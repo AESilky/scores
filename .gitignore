@@ -50,3 +50,20 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+# PCB
+*/#auto_saved_files#
+*/#auto_saved_files#/*
+*/*-backups/*
+*/_reports/*
+*.dsn
+Fp-info-cache
+
+# Word temporary
+~$*.docx
+
+# Local info
+*.private
+*.private.c
+*.private.h
+*.private.cmake
