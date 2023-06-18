@@ -2786,11 +2786,11 @@
     )
   )
 
-  (bus_alias "SEGMENT-DRIVE-C" (members "SDC.A" "SDC.B" "SDC.C" "SDC.D" "SDC.E" "SDC.F" "SDC.G" "SDC.P"))
   (bus_alias "DIGIT-ENABLE" (members "DE.A10" "DE.A01" "DE.B10" "DE.B01" "DE.C10" "DE.C01" "DE.IND"))
-  (bus_alias "SEGMENT-ENABLE" (members "SE.A" "SE.B" "SE.C" "SE.D" "SE.E" "SE.F" "SE.G" "SE.P"))
   (bus_alias "SEGMENT-DRIVE" (members "SD.A" "SD.B" "SD.C" "SD.D" "SD.E" "SD.F" "SD.G" "SD.P"))
   (bus_alias "DIGIT-DRIVE" (members "DD.A10" "DD.A01" "DD.B10" "DD.B01" "DD.C10" "DD.C01" "DD.IND"))
+  (bus_alias "SEGMENT-ENABLE" (members "SE.A" "SE.B" "SE.C" "SE.D" "SE.E" "SE.F" "SE.G" "SE.P"))
+  (bus_alias "SEGMENT-DRIVE-C" (members "SDC.A" "SDC.B" "SDC.C" "SDC.D" "SDC.E" "SDC.F" "SDC.G" "SDC.P"))
   (junction (at 116.84 158.75) (diameter 0) (color 0 0 0 0)
     (uuid 014adff3-bd11-4a41-839a-d69d35d5774a)
   )
@@ -6048,6 +6048,30 @@
     )
   )
 
+  (symbol (lib_id "Mechanical:MountingHole") (at 254 251.46 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 2c17d178-20d6-4173-83a4-46a03341d057)
+    (property "Reference" "H4" (at 256.54 250.825 0)
+      (effects (font (size 1.27 1.27)) (justify left))
+    )
+    (property "Value" "MountingHole" (at 247.65 255.27 0)
+      (effects (font (size 1.27 1.27)) (justify left))
+    )
+    (property "Footprint" "MountingHole:MountingHole_3.2mm_M3" (at 254 251.46 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+    (property "Datasheet" "~" (at 254 251.46 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+    (instances
+      (project "Score-Board"
+        (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
+          (reference "H4") (unit 1)
+        )
+      )
+    )
+  )
+
   (symbol (lib_id "Device:R_Small_US") (at 175.26 137.16 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 2c708c90-9da1-4b9d-b633-ff0e7dd54a72)
@@ -7465,10 +7489,34 @@
     )
   )
 
+  (symbol (lib_id "Mechanical:MountingHole") (at 254 241.3 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 95de3b63-d6ef-4026-9acf-b8967e2ab5a5)
+    (property "Reference" "H1" (at 256.54 240.665 0)
+      (effects (font (size 1.27 1.27)) (justify left))
+    )
+    (property "Value" "MountingHole" (at 247.65 245.11 0)
+      (effects (font (size 1.27 1.27)) (justify left))
+    )
+    (property "Footprint" "MountingHole:MountingHole_3.2mm_M3" (at 254 241.3 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+    (property "Datasheet" "~" (at 254 241.3 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+    (instances
+      (project "Score-Board"
+        (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
+          (reference "H1") (unit 1)
+        )
+      )
+    )
+  )
+
   (symbol (lib_id "Mechanical:MountingHole") (at 271.78 251.46 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 97e789a7-de5c-4928-b651-7b518327d998)
-    (property "Reference" "H3" (at 274.32 250.825 0)
+    (property "Reference" "H5" (at 274.32 250.825 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "MountingHole" (at 265.43 255.27 0)
@@ -7483,7 +7531,7 @@
     (instances
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
-          (reference "H3") (unit 1)
+          (reference "H5") (unit 1)
         )
       )
     )
@@ -7605,7 +7653,7 @@
   (symbol (lib_id "Mechanical:MountingHole") (at 288.29 241.3 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 9e7bc297-62ea-40e1-a15a-4abc8bdfa8f2)
-    (property "Reference" "H2" (at 290.83 240.665 0)
+    (property "Reference" "H3" (at 290.83 240.665 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "MountingHole" (at 281.94 245.11 0)
@@ -7620,7 +7668,7 @@
     (instances
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
-          (reference "H2") (unit 1)
+          (reference "H3") (unit 1)
         )
       )
     )
@@ -7811,7 +7859,7 @@
   (symbol (lib_id "Mechanical:MountingHole") (at 271.78 241.3 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid b1e6dbab-fed5-43e5-9fba-6fe972d8cdbf)
-    (property "Reference" "H1" (at 274.32 240.665 0)
+    (property "Reference" "H2" (at 274.32 240.665 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "MountingHole" (at 265.43 245.11 0)
@@ -7826,7 +7874,7 @@
     (instances
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
-          (reference "H1") (unit 1)
+          (reference "H2") (unit 1)
         )
       )
     )
@@ -8278,7 +8326,7 @@
   (symbol (lib_id "Mechanical:MountingHole") (at 288.29 251.46 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid d8bd02e5-e4f1-40e3-9a10-14a9d1b83048)
-    (property "Reference" "H4" (at 290.83 250.825 0)
+    (property "Reference" "H6" (at 290.83 250.825 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "MountingHole" (at 281.94 255.27 0)
@@ -8293,7 +8341,7 @@
     (instances
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
-          (reference "H4") (unit 1)
+          (reference "H6") (unit 1)
         )
       )
     )
