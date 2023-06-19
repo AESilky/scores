@@ -2786,12 +2786,11 @@
     )
   )
 
-  (bus_alias "DIGIT-ENABLE" (members "DE.A10" "DE.A01" "DE.B10" "DE.B01" "DE.C10" "DE.C01" "DE.IND"))
-  (bus_alias "SEGMENT-DRIVE" (members "SD.A" "SD.B" "SD.C" "SD.D" "SD.E" "SD.F" "SD.G" "SD.P"))
-  (bus_alias "DIGIT-DRIVE" (members "DD.A10" "DD.A01" "DD.B10" "DD.B01" "DD.C10" "DD.C01" "DD.IND"))
-  (bus_alias "SEGMENT-ENABLE" (members "SE.A" "SE.B" "SE.C" "SE.D" "SE.E" "SE.F" "SE.G" "SE.P"))
   (bus_alias "SEGMENT-DRIVE-C" (members "SDC.A" "SDC.B" "SDC.C" "SDC.D" "SDC.E" "SDC.F" "SDC.G" "SDC.P"))
-
+  (bus_alias "SEGMENT-ENABLE" (members "SE.A" "SE.B" "SE.C" "SE.D" "SE.E" "SE.F" "SE.G" "SE.P"))
+  (bus_alias "DIGIT-DRIVE" (members "DD.A10" "DD.A01" "DD.B10" "DD.B01" "DD.C10" "DD.C01" "DD.IND"))
+  (bus_alias "SEGMENT-DRIVE" (members "SD.A" "SD.B" "SD.C" "SD.D" "SD.E" "SD.F" "SD.G" "SD.P"))
+  (bus_alias "DIGIT-ENABLE" (members "DE.A10" "DE.A01" "DE.B10" "DE.B01" "DE.C10" "DE.C01" "DE.IND"))
   (junction (at 116.84 158.75) (diameter 0) (color 0 0 0 0)
     (uuid 014adff3-bd11-4a41-839a-d69d35d5774a)
   )
@@ -7381,7 +7380,7 @@
     (property "Sim.Enable" "0" (at 232.41 92.71 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "Ref" "Digit Boards" (at 233.5671 79.4662 0)
+    (property "Ref" "Digits Boards" (at 233.5671 79.4662 0)
       (effects (font (size 1.27 1.27)))
     )
     (pin "1" (uuid 8776269d-1823-4455-b076-e2258f4e44c7))
@@ -7404,9 +7403,6 @@
     (pin "9" (uuid c0d781f9-2619-448a-8625-4628d1b51316))
     (instances
       (project "Score-Board"
-        (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca/09f2d907-5c8a-4b59-8f07-76f8dfe4c1bb"
-          (reference "J14") (unit 1)
-        )
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "J9") (unit 1)
         )
@@ -8735,7 +8731,7 @@
     (property "Datasheet" " ~" (at 339.09 107.95 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "Ref" "Digit/Ind Panel" (at 339.09 72.39 0)
+    (property "Ref" "Remote Digits Panel" (at 339.09 72.39 0)
       (effects (font (size 1.27 1.27)))
     )
     (pin "0" (uuid 3b6e6edf-7494-4b64-a603-4f1355b59710))
@@ -8928,23 +8924,6 @@
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "R1") (unit 1)
         )
-      )
-    )
-  )
-
-  (sheet (at 391.16 63.5) (size 24.13 87.63) (fields_autoplaced)
-    (stroke (width 0.1524) (type solid) (color 132 0 0 1))
-    (fill (color 255 255 194 1.0000))
-    (uuid 09f2d907-5c8a-4b59-8f07-76f8dfe4c1bb)
-    (property "Sheetname" "Digits Boards" (at 391.16 62.4234 0)
-      (effects (font (size 2 2) bold) (justify left bottom))
-    )
-    (property "Sheetfile" "digits.kicad_sch" (at 391.16 151.7146 0)
-      (effects (font (size 1.27 1.27)) (justify left top) hide)
-    )
-    (instances
-      (project "Score-Board"
-        (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca" (page "2"))
       )
     )
   )

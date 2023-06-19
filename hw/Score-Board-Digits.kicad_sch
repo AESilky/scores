@@ -1,16 +1,14 @@
 (kicad_sch (version 20230121) (generator eeschema)
 
-  (uuid f167cdd5-5775-40a7-9bc0-267a8add8204)
+  (uuid 6837b59f-09d9-4828-b818-e554889c44cd)
 
   (paper "B")
 
   (title_block
-    (title "Portable Score Board w/Remote")
-    (date "2023-06-12")
-    (rev "1")
+    (title "Portable Score Board - Digits")
     (company "AESilky")
     (comment 1 "Copyright AESilky 2023")
-    (comment 4 "Digits Boards")
+    (comment 4 "Digits for Score Board Assy")
   )
 
   (lib_symbols
@@ -720,8 +718,6 @@
     )
   )
 
-  (bus_alias "SEGMENT-DRIVE-B" (members "SDB.A" "SDB.B" "SDB.C" "SDB.D" "SDB.E" "SDB.F" "SDB.G" "SDB.P"))
-  (bus_alias "SEGMENT-DRIVE-A" (members "SDA.A" "SDA.B" "SDA.C" "SDA.D" "SDA.E" "SDA.F" "SDA.G" "SDA.P"))
   (junction (at 120.65 60.96) (diameter 0) (color 0 0 0 0)
     (uuid 108232f6-58bd-40fb-bca3-61e9c6d88554)
   )
@@ -3948,6 +3944,11 @@
     (pin "1" (uuid 923fddd0-fe08-4c9c-ba64-e7df69ca7320))
     (pin "2" (uuid d6d9874b-eb99-4efc-907e-f7a63a3addba))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "R25") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "R25") (unit 1)
@@ -3977,6 +3978,11 @@
     (pin "1" (uuid 522dce2a-d4e5-466a-9b64-eb4788a9efb0))
     (pin "2" (uuid 3088931a-681a-4de6-9c45-8a64e7486693))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "R25") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "R25") (unit 1)
@@ -4006,6 +4012,11 @@
     (pin "1" (uuid d615e861-67cf-4c8c-953d-744eafb2a6bf))
     (pin "2" (uuid 7160307f-8138-425b-b044-86d7da23b72c))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "R29") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "R29") (unit 1)
@@ -4034,6 +4045,11 @@
     )
     (pin "1" (uuid d58c340d-aa8a-4574-814a-a777fb8fa395))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "#PWR035") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "#PWR035") (unit 1)
@@ -4063,6 +4079,11 @@
     (pin "1" (uuid 8c9db3c4-e55b-45bd-aead-dd6a25e1fb04))
     (pin "2" (uuid 1641d909-b51a-4953-92b8-f92935ea93aa))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "R31") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "R31") (unit 1)
@@ -4083,7 +4104,7 @@
     (property "Value" "WJLEDS18012TUR11" (at 177.8 29.21 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "Footprint" "Display_7Segment:SA15-11xxx" (at 177.8 46.99 0)
+    (property "Footprint" "AES_Library:DISP-CL18011BS-AES" (at 177.8 46.99 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "" (at 177.8 46.99 0)
@@ -4106,6 +4127,11 @@
     (pin "8" (uuid 8ea69e28-af53-47dc-9e65-5403cef63237))
     (pin "9" (uuid 7104dc9a-52eb-4438-84e6-c405a3f44c98))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "DIG5") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "DIG5") (unit 1)
@@ -4154,6 +4180,11 @@
     (pin "8" (uuid 67f4854d-ea75-4392-85d1-1b6013577ebc))
     (pin "9" (uuid 5a2ac99a-db46-458d-92e5-b166df177c50))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "J12") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca/09f2d907-5c8a-4b59-8f07-76f8dfe4c1bb"
           (reference "J12") (unit 1)
@@ -4180,6 +4211,11 @@
     (pin "1" (uuid 9c5d4028-1c6e-413b-8e14-95c6e0a06070))
     (pin "2" (uuid 7e3a340d-c936-406c-92e2-91b5faf6ae20))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "R28") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "R28") (unit 1)
@@ -4208,6 +4244,11 @@
     )
     (pin "1" (uuid 70b021b0-b218-4ebb-abe7-3b6e4e723694))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "#PWR035") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "#PWR035") (unit 1)
@@ -4235,6 +4276,11 @@
       (effects (font (size 1.27 1.27)) hide)
     )
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "H2") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "H2") (unit 1)
@@ -4264,6 +4310,11 @@
     (pin "1" (uuid 8c0cc454-f160-4099-b3a3-6fd2c857e651))
     (pin "2" (uuid 7ebc29ea-edb9-4f7b-824b-fb7540d785c0))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "R26") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "R26") (unit 1)
@@ -4293,6 +4344,11 @@
     (pin "1" (uuid 76d356f5-2539-4b3d-8b54-095c2498cdeb))
     (pin "2" (uuid fced9d9d-8be8-4d64-966e-0aebd93e0605))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "R21") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "R21") (unit 1)
@@ -4322,6 +4378,11 @@
     (pin "1" (uuid c3207bc0-31cb-4c6c-b851-2bff6e8d83d2))
     (pin "2" (uuid 32f16bc3-69a4-420a-ad39-a19dbde797e7))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "R24") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "R24") (unit 1)
@@ -4351,6 +4412,11 @@
     (pin "1" (uuid 1dafe8fa-3f87-40f7-a73b-e261808995ae))
     (pin "2" (uuid 8fc1aa85-f9fe-4f8f-bf33-fe2da4487e5a))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "R23") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "R23") (unit 1)
@@ -4371,7 +4437,7 @@
     (property "Value" "WJLEDS40012TUR11" (at 177.8 69.85 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "Footprint" "Display_7Segment:SA15-11xxx" (at 177.8 87.63 0)
+    (property "Footprint" "AES_Library:DISP-40101BCR-AES" (at 177.8 87.63 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "" (at 177.8 87.63 0)
@@ -4394,6 +4460,11 @@
     (pin "8" (uuid 69234a88-65d4-4c6d-a592-44a4a48966ea))
     (pin "9" (uuid e6266774-1861-4e57-8b51-4437bb92182f))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "DIG2") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "DIG2") (unit 1)
@@ -4423,6 +4494,11 @@
     (pin "1" (uuid f2a5efcc-8a2d-4be1-8e9e-114023bfeeff))
     (pin "2" (uuid 8c2a9f57-6560-475e-9fdf-6bb9faab92ca))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "R30") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "R30") (unit 1)
@@ -4450,6 +4526,11 @@
       (effects (font (size 1.27 1.27)) hide)
     )
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "H3") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "H3") (unit 1)
@@ -4479,6 +4560,11 @@
     (pin "1" (uuid 17a4b166-208c-445a-9ae4-825ee99d085d))
     (pin "2" (uuid 21223bd6-0bd8-4191-b12a-9ebf80f6a4d7))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "R24") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "R24") (unit 1)
@@ -4499,7 +4585,7 @@
     (property "Value" "WJLEDS40012TUR11" (at 308.61 69.85 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "Footprint" "Display_7Segment:SA15-11xxx" (at 308.61 87.63 0)
+    (property "Footprint" "AES_Library:DISP-40101BCR-AES" (at 308.61 87.63 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "" (at 308.61 87.63 0)
@@ -4522,6 +4608,11 @@
     (pin "8" (uuid 6d40af79-bba9-42ba-876f-fdcf4838e605))
     (pin "9" (uuid 7cddfdbf-39fc-4c94-9124-aba165ccb0f2))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "DIG1") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "DIG1") (unit 1)
@@ -4542,7 +4633,7 @@
     (property "Value" "WJLEDS18012TUR11" (at 120.65 29.21 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "Footprint" "Display_7Segment:SA15-11xxx" (at 120.65 46.99 0)
+    (property "Footprint" "AES_Library:DISP-CL18011BS-AES" (at 120.65 46.99 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "" (at 120.65 46.99 0)
@@ -4565,6 +4656,11 @@
     (pin "8" (uuid 4bf08c35-859d-485f-ab41-092b1f36a60b))
     (pin "9" (uuid 9f5f3123-ab18-43b0-99db-150ea33decea))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "DIG5") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "DIG5") (unit 1)
@@ -4594,6 +4690,11 @@
     (pin "1" (uuid 5b202b76-4f38-4ea8-b1d3-181e0182c8fa))
     (pin "2" (uuid 106b3b5f-f14a-42ec-99ea-8e715d60e7d7))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "R26") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "R26") (unit 1)
@@ -4623,6 +4724,11 @@
     (pin "1" (uuid 2ad944a6-ebc4-4ddd-8ada-664ee131ac2c))
     (pin "2" (uuid 80d6d742-6326-4c1d-ae2c-dfa8c5cca506))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "R31") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "R31") (unit 1)
@@ -4652,6 +4758,11 @@
     (pin "1" (uuid b5010b8d-8fa5-4539-be78-16d2c7cdadcf))
     (pin "2" (uuid 56f7f120-1c5f-4e09-b41f-d69b8e3224d0))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "R27") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "R27") (unit 1)
@@ -4681,6 +4792,11 @@
     (pin "1" (uuid 8f3c900a-3fd8-4e22-abcc-d26297499d68))
     (pin "2" (uuid 40f90b31-30e3-43e0-ab38-9e5161fc9900))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "R28") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "R28") (unit 1)
@@ -4710,6 +4826,11 @@
     (pin "1" (uuid cd2b0567-892b-4ad9-83d5-50c7115b3707))
     (pin "2" (uuid c514e76d-c693-4883-950e-4769c43210d4))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "R23") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "R23") (unit 1)
@@ -4739,6 +4860,11 @@
     (pin "1" (uuid 2b14dd63-435b-4442-9fba-89ba31c7b9b9))
     (pin "2" (uuid 65ae3e5c-f8ed-4404-b09d-adc383a8e51b))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "R28") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "R28") (unit 1)
@@ -4768,6 +4894,11 @@
     (pin "1" (uuid 7a1e3194-d563-4b92-92e7-91cbc82796a4))
     (pin "2" (uuid be8551cb-f52e-47e2-947a-a5981a1c7e48))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "LED7") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "LED7") (unit 1)
@@ -4797,6 +4928,11 @@
     (pin "1" (uuid 0b69fb71-ed80-45c4-b6f1-2395df37cc6f))
     (pin "2" (uuid 8693744a-070b-4623-b2af-f03da8caea75))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "LED5") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "LED5") (unit 1)
@@ -4825,6 +4961,11 @@
     )
     (pin "1" (uuid 1ed9888b-aa9e-4827-9b21-7505a5daeb99))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "#PWR035") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "#PWR035") (unit 1)
@@ -4852,6 +4993,11 @@
       (effects (font (size 1.27 1.27)) hide)
     )
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "H1") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "H1") (unit 1)
@@ -4881,6 +5027,11 @@
     (pin "1" (uuid 15b66a85-8d6d-403b-ac08-2fadbcfc0597))
     (pin "2" (uuid 47e72e77-3b09-4728-943a-1679c984f877))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "LED4") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "LED4") (unit 1)
@@ -4910,6 +5061,11 @@
     (pin "1" (uuid 07acb3b3-8108-4571-b910-c989011424d4))
     (pin "2" (uuid 5da33682-e509-4db9-90ad-05f47f5668da))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "R22") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "R22") (unit 1)
@@ -4939,6 +5095,11 @@
     (pin "1" (uuid 0499d5d7-f204-49dc-9458-5d48232bc5a5))
     (pin "2" (uuid 084fca23-cbb1-4079-9673-576f9d91e2d5))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "R30") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "R30") (unit 1)
@@ -4959,7 +5120,7 @@
     (property "Value" "WJLEDS18012TUR11" (at 255.27 176.53 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "Footprint" "Display_7Segment:SA15-11xxx" (at 255.27 194.31 0)
+    (property "Footprint" "AES_Library:DISP-CL18011BS-AES" (at 255.27 194.31 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "" (at 255.27 194.31 0)
@@ -4982,12 +5143,17 @@
     (pin "8" (uuid e4d910b1-1862-43d9-9c12-ec9b776c5503))
     (pin "9" (uuid d78965b8-844d-454b-bb58-51769cd2adb7))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "DIG6") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "DIG6") (unit 1)
         )
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca/09f2d907-5c8a-4b59-8f07-76f8dfe4c1bb"
-          (reference "DIG11") (unit 1)
+          (reference "DIG6") (unit 1)
         )
       )
     )
@@ -5011,6 +5177,11 @@
     (pin "1" (uuid 2b2a5d44-65e2-46f9-8f38-876e99c55b43))
     (pin "2" (uuid e2cd3da3-6fe6-460a-986d-d9528679e7d5))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "LED4") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "LED4") (unit 1)
@@ -5031,7 +5202,7 @@
     (property "Value" "WJLEDS40012TUR11" (at 120.65 69.85 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "Footprint" "Display_7Segment:SA15-11xxx" (at 120.65 87.63 0)
+    (property "Footprint" "AES_Library:DISP-40101BCR-AES" (at 120.65 87.63 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "" (at 120.65 87.63 0)
@@ -5054,6 +5225,11 @@
     (pin "8" (uuid 02f08ab7-b9e8-4011-8fb3-ddc653d9e85d))
     (pin "9" (uuid 17f18bb0-934d-4b42-91a4-6787faea3de9))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "DIG1") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "DIG1") (unit 1)
@@ -5083,6 +5259,11 @@
     (pin "1" (uuid 89b6fe05-16ce-45f9-aca9-4095d5587daf))
     (pin "2" (uuid dfa406fa-b6ec-4be6-bd16-8f1cf366a226))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "R29") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "R29") (unit 1)
@@ -5131,6 +5312,11 @@
     (pin "8" (uuid e354f8cb-1db6-4aea-8477-5f7842d61b56))
     (pin "9" (uuid 74c930e0-efba-4270-bbc6-009142a09be6))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "J13") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca/09f2d907-5c8a-4b59-8f07-76f8dfe4c1bb"
           (reference "J13") (unit 1)
@@ -5157,6 +5343,11 @@
     (pin "1" (uuid 0e1cc0a5-d458-4e02-8e21-00e9bb2f1ed7))
     (pin "2" (uuid 1f8bf76c-54c6-41da-b5a2-d5ef1b446321))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "LED6") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "LED6") (unit 1)
@@ -5186,6 +5377,11 @@
     (pin "1" (uuid 13b2850c-7678-4ae8-9226-ef148e95c516))
     (pin "2" (uuid d182ba1d-bee9-4812-bada-8eebd0c7c092))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "R31") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "R31") (unit 1)
@@ -5215,6 +5411,11 @@
     (pin "1" (uuid 55f91f0c-ed6e-4582-a71b-74c8da8acf37))
     (pin "2" (uuid 817daa6c-83c6-482a-8a5c-587953d2efdd))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "R22") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "R22") (unit 1)
@@ -5242,6 +5443,11 @@
       (effects (font (size 1.27 1.27)) hide)
     )
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "H4") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "H4") (unit 1)
@@ -5269,6 +5475,11 @@
       (effects (font (size 1.27 1.27)) hide)
     )
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "H3") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "H3") (unit 1)
@@ -5297,6 +5508,11 @@
     )
     (pin "1" (uuid d6f0f5d2-9101-41d5-8fe4-c3478d67dfeb))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "#PWR035") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "#PWR035") (unit 1)
@@ -5326,6 +5542,11 @@
     (pin "1" (uuid bc01bf70-384b-4cf0-b778-43935547ff60))
     (pin "2" (uuid 75ac1cfc-cb4b-4197-8447-15f507fe8fbb))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "R32") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "R32") (unit 1)
@@ -5354,6 +5575,11 @@
     )
     (pin "1" (uuid d34c7290-2a07-4c46-a858-a1a4086357cd))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "#PWR035") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "#PWR035") (unit 1)
@@ -5383,6 +5609,11 @@
     (pin "1" (uuid 15616be3-3f2e-4d46-ba45-f5db063eaaee))
     (pin "2" (uuid 0f3da7af-9721-4b63-a7ae-802920c33599))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "R32") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "R32") (unit 1)
@@ -5412,6 +5643,11 @@
     (pin "1" (uuid c77a5a36-47cd-43e6-8b09-6836b52aa37c))
     (pin "2" (uuid 5189508c-3c21-4b1c-bb9e-a49c52afd863))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "R30") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "R30") (unit 1)
@@ -5439,6 +5675,11 @@
       (effects (font (size 1.27 1.27)) hide)
     )
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "H4") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "H4") (unit 1)
@@ -5468,6 +5709,11 @@
     (pin "1" (uuid 1ae9e17a-5d48-48ba-a3ab-d61b77ad2868))
     (pin "2" (uuid 0ebde024-1a77-480a-9dd0-1e8eaffd39a8))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "R21") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "R21") (unit 1)
@@ -5497,6 +5743,11 @@
     (pin "1" (uuid 8efb3b6e-e45f-4191-8bf9-1fbb0199e35e))
     (pin "2" (uuid 33e5f85c-8348-4e75-a700-3aa1d522ddd2))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "LED6") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "LED6") (unit 1)
@@ -5526,6 +5777,11 @@
     (pin "1" (uuid f99c8370-c152-44ab-afa2-2679db76c39b))
     (pin "2" (uuid 1761ed0b-23a7-43d3-941a-3a811f7a403d))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "R27") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "R27") (unit 1)
@@ -5555,6 +5811,11 @@
     (pin "1" (uuid 0d2f5acc-3840-4c1f-8ca0-39c9e5d4f2ab))
     (pin "2" (uuid e4176a9a-44ce-4b49-ab21-2c0c189eff33))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "LED7") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "LED7") (unit 1)
@@ -5575,7 +5836,7 @@
     (property "Value" "WJLEDS40012TUR11" (at 365.76 69.85 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "Footprint" "Display_7Segment:SA15-11xxx" (at 365.76 87.63 0)
+    (property "Footprint" "AES_Library:DISP-40101BCR-AES" (at 365.76 87.63 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "" (at 365.76 87.63 0)
@@ -5598,6 +5859,11 @@
     (pin "8" (uuid d0041d31-86ef-46f5-94c8-97542a27581d))
     (pin "9" (uuid 2c25d075-f950-4d00-83c3-17b26b8e51b1))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "DIG2") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "DIG2") (unit 1)
@@ -5626,6 +5892,11 @@
     )
     (pin "1" (uuid 5452a0a6-8ef9-41d5-aad6-fd82b0fd35e7))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "#PWR035") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "#PWR035") (unit 1)
@@ -5646,7 +5917,7 @@
     (property "Value" "WJLEDS18012TUR11" (at 308.61 29.21 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "Footprint" "Display_7Segment:SA15-11xxx" (at 308.61 46.99 0)
+    (property "Footprint" "AES_Library:DISP-CL18011BS-AES" (at 308.61 46.99 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "" (at 308.61 46.99 0)
@@ -5669,6 +5940,11 @@
     (pin "8" (uuid 9f274ab3-a15d-4ff6-9099-f577194e9b12))
     (pin "9" (uuid c9565833-d7d2-44e1-a2f1-81623f62b7cc))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "DIG5") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "DIG5") (unit 1)
@@ -5698,6 +5974,11 @@
     (pin "1" (uuid df382d1c-79d3-4230-b79a-8fcb1a2554ff))
     (pin "2" (uuid e036a0b7-763f-4c31-a488-8e84df32ee2b))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "R27") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "R27") (unit 1)
@@ -5725,6 +6006,11 @@
       (effects (font (size 1.27 1.27)) hide)
     )
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "H4") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "H4") (unit 1)
@@ -5754,6 +6040,11 @@
     (pin "1" (uuid 479c805e-006e-40b9-9df1-44ccab721af4))
     (pin "2" (uuid a1424d13-c526-4f32-aa64-b6e5bb3a4eaa))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "R26") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "R26") (unit 1)
@@ -5783,6 +6074,11 @@
     (pin "1" (uuid 57bba832-fd35-4aa2-ba5a-f7d8ab88c90b))
     (pin "2" (uuid 0cbbd651-99e2-4d38-ba2b-ed43a9e5cd76))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "R29") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "R29") (unit 1)
@@ -5810,6 +6106,11 @@
       (effects (font (size 1.27 1.27)) hide)
     )
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "H2") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "H2") (unit 1)
@@ -5830,7 +6131,7 @@
     (property "Value" "WJLEDS18012TUR11" (at 365.76 29.21 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "Footprint" "Display_7Segment:SA15-11xxx" (at 365.76 46.99 0)
+    (property "Footprint" "AES_Library:DISP-CL18011BS-AES" (at 365.76 46.99 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "" (at 365.76 46.99 0)
@@ -5853,6 +6154,11 @@
     (pin "8" (uuid dc27dcc3-2d18-4ec3-919e-9bc6655668a4))
     (pin "9" (uuid 7cc16615-954a-4390-a932-5fba1e87d7f7))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "DIG5") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "DIG5") (unit 1)
@@ -5880,6 +6186,11 @@
       (effects (font (size 1.27 1.27)) hide)
     )
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "H1") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "H1") (unit 1)
@@ -5909,6 +6220,11 @@
     (pin "1" (uuid 63e8c674-2f31-402f-b0e1-9d65eb98dc73))
     (pin "2" (uuid 845d4ec4-1926-45c5-85d0-3c59d220db67))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "LED5") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "LED5") (unit 1)
@@ -5929,7 +6245,7 @@
     (property "Value" "WJLEDS18012TUR11" (at 223.52 176.53 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "Footprint" "Display_7Segment:SA15-11xxx" (at 223.52 194.31 0)
+    (property "Footprint" "AES_Library:DISP-CL18011BS-AES" (at 223.52 194.31 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "" (at 223.52 194.31 0)
@@ -5952,12 +6268,17 @@
     (pin "8" (uuid ba07d04a-7f87-48a9-9f96-dbbef476f00c))
     (pin "9" (uuid e3387aaa-8aa4-4a43-8c03-b062404e272e))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "DIG5") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "DIG5") (unit 1)
         )
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca/09f2d907-5c8a-4b59-8f07-76f8dfe4c1bb"
-          (reference "DIG9") (unit 1)
+          (reference "DIG5") (unit 1)
         )
       )
     )
@@ -5981,6 +6302,11 @@
     (pin "1" (uuid 38ba4a3e-70f7-49e2-8322-48d1a725adce))
     (pin "2" (uuid 9929621f-37b2-4e08-a364-77cec2b060d2))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "R32") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "R32") (unit 1)
@@ -6008,6 +6334,11 @@
       (effects (font (size 1.27 1.27)) hide)
     )
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "H1") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "H1") (unit 1)
@@ -6056,6 +6387,11 @@
     (pin "8" (uuid 0631f8c1-8ed9-4b9b-8d0b-0c6ca0bb590a))
     (pin "9" (uuid 61db6c89-1e18-45ec-8eb8-ce76352456f3))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "J11") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca/09f2d907-5c8a-4b59-8f07-76f8dfe4c1bb"
           (reference "J11") (unit 1)
@@ -6080,6 +6416,11 @@
       (effects (font (size 1.27 1.27)) hide)
     )
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "H2") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "H2") (unit 1)
@@ -6109,6 +6450,11 @@
     (pin "1" (uuid bf9678a7-4dc5-4945-bd6d-5f9dbbf7d31b))
     (pin "2" (uuid bc8017b0-b8ff-4f96-bc97-40f071dcb3b2))
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "R25") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "R25") (unit 1)
@@ -6136,6 +6482,11 @@
       (effects (font (size 1.27 1.27)) hide)
     )
     (instances
+      (project "Score-Board-Digits"
+        (path "/6837b59f-09d9-4828-b818-e554889c44cd"
+          (reference "H3") (unit 1)
+        )
+      )
       (project "Score-Board"
         (path "/68d67001-ae41-4f9d-ab97-8e1f3faa3aca"
           (reference "H3") (unit 1)
@@ -6145,5 +6496,9 @@
         )
       )
     )
+  )
+
+  (sheet_instances
+    (path "/" (page "1"))
   )
 )
