@@ -244,6 +244,12 @@ extern void ui_term_register_input_available_handler(ui_term_input_available_han
  */
 extern uint16_t ui_term_scroll_end_line_get();
 
+/**
+ * @brief Set the color to the command display color.
+ * @ingroup ui
+ */
+extern void ui_term_use_cmd_color();
+
 #ifdef __cplusplus
     }
 #endif

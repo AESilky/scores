@@ -15,8 +15,8 @@
 #include "cmt.h"
 #include "config.h"
 #include "core1_main.h"
-#include "board.h"
 #include "multicore.h"
+#include "panel.h"
 #include "util.h"
 #include "ui_disp.h"
 #include "ui_term.h"
@@ -141,7 +141,7 @@ static void _user_input_sw_irq_handler(uint gpio, uint32_t events) {
         debug_printf(false, "User Input Switch pressed.\n");
     }
     if (events & GPIO_IRQ_EDGE_RISE) {
-        //printf("re switch released\n");
+        debug_printf(false, "User Input Switch released.\n");
     }
 }
 
@@ -159,6 +159,10 @@ void start_ui(void) {
 }
 
 void ui_module_init() {
+    // Initialize the score panel
+    score_panel_module_init();
+    panel_allow_gpio_write(true);
+
     gpio_set_irq_enabled_with_callback(IRQ_USER_INPUT_SW, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL, true, &_ui_gpio_irq_handler);
 
     ui_disp_build();

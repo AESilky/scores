@@ -40,6 +40,7 @@
 #include "debug_support.h"
 #include "multicore.h"
 #include "net.h"
+#include "panel.h"
 #include "term.h"
 #include "util.h"
 
@@ -93,11 +94,6 @@ int board_init() {
     }
     cyw43_arch_enable_sta_mode();
 
-    // SPI 1 initialization for the SD card. Use SPI at 2.2MHz.
-    spi_init(SPI_SDCARD_DEVICE, 2200 * 1000);
-    gpio_set_function(SPI_SDCARD_SCK,  GPIO_FUNC_SPI);
-    gpio_set_function(SPI_SDCARD_MOSI, GPIO_FUNC_SPI);
-    gpio_set_function(SPI_SDCARD_MISO, GPIO_FUNC_SPI);
     // Chip selects for the SPI paripherals
     gpio_set_function(SPI_SDCARD_CS,   GPIO_FUNC_SIO);
     // Chip selects are active-low, so we'll initialize them to a driven-high state
@@ -108,6 +104,11 @@ int board_init() {
     gpio_set_drive_strength(SPI_SDCARD_CS, GPIO_DRIVE_STRENGTH_2MA);    // CS goes to a single device
     // Initial output state
     gpio_put(SPI_SDCARD_CS, SPI_CS_DISABLE);
+    // SPI 1 initialization for the SD card. Use SPI at 2.2MHz.
+    spi_init(SPI_SDCARD_DEVICE, 2200 * 1000);
+    gpio_set_function(SPI_SDCARD_SCK, GPIO_FUNC_SPI);
+    gpio_set_function(SPI_SDCARD_MOSI, GPIO_FUNC_SPI);
+    gpio_set_function(SPI_SDCARD_MISO, GPIO_FUNC_SPI);
 
     // I2C Initialisation.
     i2c_init(PICO_DEFAULT_I2C, 400 * 1000);
@@ -118,10 +119,73 @@ int board_init() {
     gpio_pull_up(PICO_DEFAULT_I2C_SCL_PIN);
 
     // GPIO Outputs (other than chip-selects)
+    //    Tone drive
     gpio_set_function(TONE_DRIVE,   GPIO_FUNC_SIO);
     gpio_set_dir(TONE_DRIVE, GPIO_OUT);
     gpio_set_drive_strength(TONE_DRIVE, GPIO_DRIVE_STRENGTH_4MA);
     gpio_put(TONE_DRIVE, TONE_OFF);
+    //    Digit 7-Segment enables
+    gpio_set_function(PANEL_DIGIT_SEG_A_GPIO, GPIO_FUNC_SIO);
+    gpio_set_dir(PANEL_DIGIT_SEG_A_GPIO, GPIO_OUT);
+    gpio_set_drive_strength(PANEL_DIGIT_SEG_A_GPIO, GPIO_DRIVE_STRENGTH_2MA);
+    gpio_put(PANEL_DIGIT_SEG_A_GPIO, PANEL_DIGIT_SEG_OFF);
+    gpio_set_function(PANEL_DIGIT_SEG_B_GPIO, GPIO_FUNC_SIO);
+    gpio_set_dir(PANEL_DIGIT_SEG_B_GPIO, GPIO_OUT);
+    gpio_set_drive_strength(PANEL_DIGIT_SEG_B_GPIO, GPIO_DRIVE_STRENGTH_2MA);
+    gpio_put(PANEL_DIGIT_SEG_B_GPIO, PANEL_DIGIT_SEG_OFF);
+    gpio_set_function(PANEL_DIGIT_SEG_C_GPIO, GPIO_FUNC_SIO);
+    gpio_set_dir(PANEL_DIGIT_SEG_C_GPIO, GPIO_OUT);
+    gpio_set_drive_strength(PANEL_DIGIT_SEG_C_GPIO, GPIO_DRIVE_STRENGTH_2MA);
+    gpio_put(PANEL_DIGIT_SEG_C_GPIO, PANEL_DIGIT_SEG_OFF);
+    gpio_set_function(PANEL_DIGIT_SEG_D_GPIO, GPIO_FUNC_SIO);
+    gpio_set_dir(PANEL_DIGIT_SEG_D_GPIO, GPIO_OUT);
+    gpio_set_drive_strength(PANEL_DIGIT_SEG_D_GPIO, GPIO_DRIVE_STRENGTH_2MA);
+    gpio_put(PANEL_DIGIT_SEG_D_GPIO, PANEL_DIGIT_SEG_OFF);
+    gpio_set_function(PANEL_DIGIT_SEG_E_GPIO, GPIO_FUNC_SIO);
+    gpio_set_dir(PANEL_DIGIT_SEG_E_GPIO, GPIO_OUT);
+    gpio_set_drive_strength(PANEL_DIGIT_SEG_E_GPIO, GPIO_DRIVE_STRENGTH_2MA);
+    gpio_put(PANEL_DIGIT_SEG_E_GPIO, PANEL_DIGIT_SEG_OFF);
+    gpio_set_function(PANEL_DIGIT_SEG_F_GPIO, GPIO_FUNC_SIO);
+    gpio_set_dir(PANEL_DIGIT_SEG_F_GPIO, GPIO_OUT);
+    gpio_set_drive_strength(PANEL_DIGIT_SEG_F_GPIO, GPIO_DRIVE_STRENGTH_2MA);
+    gpio_put(PANEL_DIGIT_SEG_F_GPIO, PANEL_DIGIT_SEG_OFF);
+    gpio_set_function(PANEL_DIGIT_SEG_G_GPIO, GPIO_FUNC_SIO);
+    gpio_set_dir(PANEL_DIGIT_SEG_G_GPIO, GPIO_OUT);
+    gpio_set_drive_strength(PANEL_DIGIT_SEG_G_GPIO, GPIO_DRIVE_STRENGTH_2MA);
+    gpio_put(PANEL_DIGIT_SEG_G_GPIO, PANEL_DIGIT_SEG_OFF);
+    gpio_set_function(PANEL_DIGIT_SEG_P_GPIO, GPIO_FUNC_SIO);
+    gpio_set_dir(PANEL_DIGIT_SEG_P_GPIO, GPIO_OUT);
+    gpio_set_drive_strength(PANEL_DIGIT_SEG_P_GPIO, GPIO_DRIVE_STRENGTH_2MA);
+    gpio_put(PANEL_DIGIT_SEG_P_GPIO, PANEL_DIGIT_SEG_OFF);
+    //    Digit enables
+    gpio_set_function(PANEL_DIGIT_A10_GPIO, GPIO_FUNC_SIO);
+    gpio_set_dir(PANEL_DIGIT_A10_GPIO, GPIO_OUT);
+    gpio_set_drive_strength(PANEL_DIGIT_A10_GPIO, GPIO_DRIVE_STRENGTH_2MA);
+    gpio_put(PANEL_DIGIT_A10_GPIO, PANEL_DIGIT_OFF);
+    gpio_set_function(PANEL_DIGIT_A01_GPIO, GPIO_FUNC_SIO);
+    gpio_set_dir(PANEL_DIGIT_A01_GPIO, GPIO_OUT);
+    gpio_set_drive_strength(PANEL_DIGIT_A01_GPIO, GPIO_DRIVE_STRENGTH_2MA);
+    gpio_put(PANEL_DIGIT_A01_GPIO, PANEL_DIGIT_OFF);
+    gpio_set_function(PANEL_DIGIT_B10_GPIO, GPIO_FUNC_SIO);
+    gpio_set_dir(PANEL_DIGIT_B10_GPIO, GPIO_OUT);
+    gpio_set_drive_strength(PANEL_DIGIT_B10_GPIO, GPIO_DRIVE_STRENGTH_2MA);
+    gpio_put(PANEL_DIGIT_B10_GPIO, PANEL_DIGIT_OFF);
+    gpio_set_function(PANEL_DIGIT_B01_GPIO, GPIO_FUNC_SIO);
+    gpio_set_dir(PANEL_DIGIT_B01_GPIO, GPIO_OUT);
+    gpio_set_drive_strength(PANEL_DIGIT_B01_GPIO, GPIO_DRIVE_STRENGTH_2MA);
+    gpio_put(PANEL_DIGIT_B01_GPIO, PANEL_DIGIT_OFF);
+    gpio_set_function(PANEL_DIGIT_C10_GPIO, GPIO_FUNC_SIO);
+    gpio_set_dir(PANEL_DIGIT_C10_GPIO, GPIO_OUT);
+    gpio_set_drive_strength(PANEL_DIGIT_C10_GPIO, GPIO_DRIVE_STRENGTH_2MA);
+    gpio_put(PANEL_DIGIT_C10_GPIO, PANEL_DIGIT_OFF);
+    gpio_set_function(PANEL_DIGIT_C01_GPIO, GPIO_FUNC_SIO);
+    gpio_set_dir(PANEL_DIGIT_C01_GPIO, GPIO_OUT);
+    gpio_set_drive_strength(PANEL_DIGIT_C01_GPIO, GPIO_DRIVE_STRENGTH_2MA);
+    gpio_put(PANEL_DIGIT_C01_GPIO, PANEL_DIGIT_OFF);
+    gpio_set_function(PANEL_DIGIT_IND_GPIO, GPIO_FUNC_SIO);
+    gpio_set_dir(PANEL_DIGIT_IND_GPIO, GPIO_OUT);
+    gpio_set_drive_strength(PANEL_DIGIT_IND_GPIO, GPIO_DRIVE_STRENGTH_2MA);
+    gpio_put(PANEL_DIGIT_IND_GPIO, PANEL_DIGIT_OFF);
 
     // GPIO Inputs
     //    IR Detectors

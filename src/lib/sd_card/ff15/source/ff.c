@@ -2756,7 +2756,7 @@ static void get_fileinfo (
 /* Pattern matching                                                      */
 /*-----------------------------------------------------------------------*/
 
-#define FIND_RECURS	4	/* Maximum number of wildcard terms in the pattern to limit recursion */
+#define FPANEL_IND_RECURS	4	/* Maximum number of wildcard terms in the pattern to limit recursion */
 
 
 static DWORD get_achar (	/* Get a character and advance ptr */
@@ -4737,9 +4737,9 @@ FRESULT f_findnext (
 	for (;;) {
 		res = f_readdir(dp, fno);		/* Get a directory item */
 		if (res != FR_OK || !fno || !fno->fname[0]) break;	/* Terminate if any error or end of directory */
-		if (pattern_match(dp->pat, fno->fname, 0, FIND_RECURS)) break;		/* Test for the file name */
+		if (pattern_match(dp->pat, fno->fname, 0, FPANEL_IND_RECURS)) break;		/* Test for the file name */
 #if FF_USE_LFN && FF_USE_FIND == 2
-		if (pattern_match(dp->pat, fno->altname, 0, FIND_RECURS)) break;	/* Test for alternative name if exist */
+		if (pattern_match(dp->pat, fno->altname, 0, FPANEL_IND_RECURS)) break;	/* Test for alternative name if exist */
 #endif
 	}
 	return res;
