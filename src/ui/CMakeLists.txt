@@ -9,6 +9,7 @@ target_sources(ui INTERFACE
 
 add_subdirectory(cmd)
 add_subdirectory(display)
+add_subdirectory(segments7)
 add_subdirectory(term)
 
 target_link_libraries(ui INTERFACE

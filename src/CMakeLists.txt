@@ -38,19 +38,20 @@ add_subdirectory(cmt)
 add_subdirectory(data)
 add_subdirectory(gfx)
 add_subdirectory(net)
+add_subdirectory(scorekeeper)
 add_subdirectory(test)
 add_subdirectory(util)
 add_subdirectory(ui)
 
 # Add executable.
 add_executable(scores
-  Scores.c
+  main.c
   board.c
   debug_support.c
   spi_ops.c
 )
 
-pico_set_program_name(scores "scores")
+pico_set_program_name(scores "Scores")
 pico_set_program_version(scores "0.1")
 
 # Use the UART while using the Picoprobe
@@ -68,6 +69,7 @@ include_directories(
   ${PICO_SDK_PATH}/src/rp2_common/hardware_spi/include
   ${PICO_SDK_PATH}/src/rp2_common/hardware_i2c/include
   ${PICO_SDK_PATH}/src/rp2_common/hardware_pio/include
+  ${PICO_SDK_PATH}/src/rp2_common/hardware_pwm/include
   ${PICO_SDK_PATH}/src/rp2_common/hardware_rtc/include
   ${PICO_SDK_PATH}/src/rp2_common/pico_cyw43_arch/include
   ${PICO_SDK_PATH}/src/rp2_common/pico_multicore/include
@@ -78,10 +80,13 @@ include_directories(
   data
   gfx
   net
+  scorekeeper
   test
   ui
   ui/cmd
   ui/display/oled1306_i2c
+  ui/display/score_panel
+  ui/segments7
   ui/term
   util
   lib/sd_card/sd_driver
@@ -109,6 +114,9 @@ target_link_libraries(scores
   gfx
   scores_test
   net
+  score_panel
+  scorekeeper
+  segments7
   term
   ui
   util

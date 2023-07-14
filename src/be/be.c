@@ -14,6 +14,7 @@
 #include "board.h"
 #include "debug_support.h"
 #include "net.h"
+#include "scorekeeper/scorekeeper.h"
 #include "util.h"
 #include "hardware/rtc.h"
 
@@ -150,12 +151,14 @@ static void _handle_ui_initialized(cmt_msg_t* msg) {
     // are also initialized, so -
     //
     // Start things running.
+    scorekeeper_update_panel_scores();
 }
 
 void be_module_init() {
     _last_rtc_update_ts = 0;
     const config_t* cfg = config_current();
     _last_cfg = config_new(cfg);
+    scorekeeper_module_init();
 
     // Done with the Backend Initialization - Let the UI know.
     _msg_be_initialized.id = MSG_BE_INITIALIZED;

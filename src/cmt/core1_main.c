@@ -1,5 +1,5 @@
 /**
- * scores Core 1 main start-up and management.
+ * Scores Core 1 (UI) main start-up and management.
  *
  * This containes the main routine (the entry point) for operations on Core 1.
  *
