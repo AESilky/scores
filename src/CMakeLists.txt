@@ -16,7 +16,6 @@ if (PICO_SDK_VERSION_STRING VERSION_LESS "1.5.0")
 endif()
 # Use fully-deoptimized debug build for true single-step and data viewing. Set to '0' for some optimizations
 set(PICO_DEOPTIMIZED_DEBUG 1)
-pico_sdk_init()
 
 project(scores C CXX ASM)
 
@@ -28,6 +27,7 @@ add_compile_options(
   -Wno-maybe-uninitialized
   #-H                       # list include header paths
 )
+pico_sdk_init()
 
 # External libraries
 add_subdirectory(lib/sd_card)
@@ -93,7 +93,6 @@ target_link_libraries(scores
   config
   cmd
   cmt
-  data
   display
   gfx
   scores_test
