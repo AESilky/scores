@@ -13,10 +13,12 @@
  */
 #include "test.h"
 #include "system_defs.h"
-#include "config.h"
+
 #include "board.h"
-#include "term.h"
-#include "util.h"
+#include "config/config.h"
+#include "ui/term/term.h"
+#include "util/util.h"
+
 #include "hardware/rtc.h"
 #include "pico.h"
 #include "pico/stdio.h"
@@ -25,6 +27,7 @@
 #include "pico/time.h"
 #include "pico/types.h"
 #include "pico/util/datetime.h"
+
 #include <string.h>
 
 // The following are from 'config.c' to be used in

@@ -9,10 +9,11 @@
 //
 #include "system_defs.h" // Main system/board/application definitions
 //
-#include "be.h"
 #include "board.h"
 #include "debug_support.h"
-#include "ui.h"
+//
+#include "be/be.h"
+#include "ui/ui.h"
 
 #define DOT_MS 60 // Dot at 20 WPM
 #define UP_MS  DOT_MS

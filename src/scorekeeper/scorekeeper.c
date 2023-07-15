@@ -8,8 +8,8 @@
 */
 
 #include "scorekeeper.h"
-#include "panel.h"
-#include "segments7.h"
+#include "ui/display/score_panel/panel.h"
+#include "ui/segments7/segments7.h"
 
 typedef enum _panel_update_enum {
     NoPU = 0,
@@ -30,7 +30,7 @@ static void _panel_update_b_score();
 //
 static uint8_t _score_a;
 static uint8_t _score_b;
-static uint8_t _period;
+//static uint8_t _period;
 
 /////////////////////////////////////////////////////////////////////
 // Internal functions

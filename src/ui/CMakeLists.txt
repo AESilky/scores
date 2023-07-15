@@ -12,6 +12,10 @@ add_subdirectory(display)
 add_subdirectory(segments7)
 add_subdirectory(term)
 
+include_directories(
+    ${CMAKE_CURRENT_LIST_DIR}
+)
+
 target_link_libraries(ui INTERFACE
     pico_stdlib
 )

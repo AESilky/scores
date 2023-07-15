@@ -11,9 +11,11 @@
 extern "C" {
 #endif
 
-#include <stdint.h>
-#include "cmt.h"
+#include "cmt/cmt.h"
+
 #include "pico/types.h"
+
+#include <stdint.h>
 
 /**
  * @brief Build (or rebuild) the UI on the display.

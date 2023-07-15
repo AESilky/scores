@@ -6,13 +6,16 @@
  *
 */
 #include "ui_term.h"
-#include "config.h"
-#include "cmd.h"
-#include "cmt.h"
-#include "term.h"
-#include "util.h"
+
+#include "cmt/cmt.h"
+#include "config/config.h"
+#include "ui/cmd/cmd.h"
+#include "ui/term/term.h"
+#include "util/util.h"
+
 #include "hardware/rtc.h"
 #include "pico/printf.h"
+
 #include <ctype.h>
 #include <string.h>
 

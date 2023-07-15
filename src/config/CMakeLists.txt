@@ -3,7 +3,9 @@ add_library(config INTERFACE)
 
 target_sources(config INTERFACE
   config.c
+  config_cmd.c
   config_fops.c
+  config_hndlr.c
 )
 
 include_directories(

@@ -5,9 +5,10 @@
  * SPDX-License-Identifier: MIT License
  */
 #include "debug_support.h"
-#include "cmt.h"
-#include "ui_term.h"
-#include "util.h"
+
+#include "cmt/cmt.h"
+#include "ui/ui_term.h"
+#include "util/util.h"
 
 volatile uint16_t debugging_flags = 0;
 static bool _debug_mode_enabled = false;

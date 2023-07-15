@@ -34,15 +34,15 @@
 
 #include "system_defs.h"
 
-#include "config.h"
-#include "display_oled1306.h"
+#include "config/config.h"
+#include "ui/display/oled1306_i2c/display_oled1306.h"
 #include "board.h"
 #include "debug_support.h"
-#include "multicore.h"
-#include "net.h"
-#include "panel.h"
-#include "term.h"
-#include "util.h"
+#include "cmt/multicore.h"
+#include "net/net.h"
+#include "ui/display/score_panel/panel.h"
+#include "ui/term/term.h"
+#include "util/util.h"
 
 // Internal function declarations
 

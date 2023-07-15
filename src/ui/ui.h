@@ -13,7 +13,7 @@
 extern "C" {
 #endif
 
-#include "cmt.h"
+#include "cmt/cmt.h"
 
 #define UI_CORE_NUM 1
 

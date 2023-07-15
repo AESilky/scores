@@ -7,14 +7,17 @@
  */
 
 #include "cmd.h"
+
 #include "system_defs.h"
 
-#include "config.h"
-#include "cmt.h"
 #include "debug_support.h"
-#include "term.h"
-#include "ui_term.h"
-#include "util.h"
+#include "cmt/cmt.h"
+#include "config/config.h"
+#include "config/config_cmd.h"
+#include "ui/ui_term.h"
+#include "ui/term/term.h"
+#include "util/util.h"
+
 #include "pico/printf.h"
 
 #include <string.h>
@@ -60,7 +63,7 @@ static const cmd_handler_entry_t _cmd_proc_status_entry = {
  * @brief List of Command Handlers
  */
 static const cmd_handler_entry_t* _command_entries[] = {
-    & cmd_debug_support_entry,        // .debug - 'DOT' commands come first
+    & cmd_debug_support_entry,  // .debug - 'DOT' commands come first
     & _cmd_proc_status_entry,   // .ps
     & cmd_bootcfg_entry,
     & cmd_cfg_entry,

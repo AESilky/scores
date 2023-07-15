@@ -1,5 +1,5 @@
 /**
- * KOB Configuration functionaly
+ * Configuration functionaly
  *
  * Copyright 2023 AESilky
  * SPDX-License-Identifier: MIT License
@@ -10,22 +10,9 @@
 #ifdef __cplusplus
  extern "C" {
 #endif
+
 #include <stdbool.h>
 #include <stdint.h>
-#include "pico/types.h"
-
-#include "cmd_t.h" // Command processing type definitions
-
-typedef enum _code_type_ {
-    CODE_TYPE_AMERICAN = 0,
-    CODE_TYPE_INTERNATIONAL = 1,
-} code_type_t;
-
-typedef enum _code_spacing_ {
-    CODE_SPACING_NONE = 0,
-    CODE_SPACING_CHAR = 1,
-    CODE_SPACING_WORD = 2,
-} code_spacing_t;
 
 #define CONFIG_NAME_MAX_LEN 15
 #define CONFIG_VERSION 1
@@ -35,29 +22,8 @@ typedef struct _config_ {
     //
     char* name;
     //
-    bool auto_connect;
-    uint8_t char_speed_min;
-    code_type_t code_type;
-    char* host_and_port; // host/addr:port of the MorseKOB Server
-    bool invert_key_input;
-    bool key_has_closer;
-    bool local;
-    bool remote;
     bool sound;
-    bool sounder;
-    code_spacing_t spacing;
-    char* station;
-    uint8_t text_speed;
-    uint16_t wire;
 } config_t;
-
-#define _SYSCFG_VER_ID 0x0001
-#define _SYSCFG_BCN_ID 0x0002
-#define _SYSCFG_TZ_ID  0x0004
-#define _SYSCFG_WP_ID  0x0008
-#define _SYSCFG_WS_ID  0x0010
-#define _SYSCFG_DWB_ID 0x0020
-#define _SYSCFG_NOT_LOADED 0x8000
 
 typedef struct _sys_config_ {
     bool is_set;
@@ -72,12 +38,13 @@ typedef struct _sys_config_ {
     uint16_t disp_wrap_back;
 } config_sys_t;
 
-extern const cmd_handler_entry_t cmd_bootcfg_entry;
-extern const cmd_handler_entry_t cmd_cfg_entry;
-extern const cmd_handler_entry_t cmd_configure_entry;
-extern const cmd_handler_entry_t cmd_load_entry;
-extern const cmd_handler_entry_t cmd_save_entry;
-extern const cmd_handler_entry_t cmd_station_entry;
+/**
+ * @brief Get the boot config number.
+ * @ingroup config
+ * 
+ * @return int The config number to use at boot.
+ */
+extern int config_boot_number();
 
 /**
  * @brief Clear the values of a configuration instance to the initial values.
@@ -108,10 +75,19 @@ extern const config_t* config_current();
 
 /**
  * @brief Get the current configuration to be modified.
+ * @ingroup config
  *
  * @return config_t* Current configuration.
  */
 extern config_t* config_current_for_modification();
+
+/**
+ * @brief Get the number (1-9) of the current configuration.
+ * @ingroup config
+ *
+ * @return int
+ */
+extern int config_current_number();
 
 /**
  * @brief Free a config_t structure previously allowcated with config_new.
@@ -129,12 +105,6 @@ extern void config_free(config_t* config);
 extern void config_indicate_changed();
 
 /**
- * @brief Initialize the configuration subsystem
- * @ingroup config
-*/
-extern int config_module_init();
-
-/**
  * @brief Load the current config from saved config number.
  * @ingroup config
  *
@@ -142,6 +112,29 @@ extern int config_module_init();
  * @return true Config was loaded.
  */
 extern bool config_load(int config_num);
+
+/**
+ * @brief Make a new config the current config.
+ * @ingroup config
+ * 
+ * After setting the new config as the current config, the config changed
+ * message will be posted to both cores.
+ *
+ * @param new_config The config to make current (replacing the current config)
+ */
+extern void config_make_current(config_t* new_config);
+
+/**
+ * @brief Make a new config the current and set the config number.
+ * @ingroup config
+ *
+ * After setting the new config as the current config, the config changed
+ * message will be posted to both cores.
+ *
+ * @param new_config The config to make current (replacing the current config)
+ * @param config_num The number (1-9) to assign to the config
+ */
+extern void config_make_current_w_num(config_t* new_config, int config_num);
 
 /**
  * @brief Allocate a new config_t structure. Optionally, initialize values.
@@ -187,6 +180,12 @@ extern const config_sys_t* config_sys();
  * @return false System config could not be read and isn't valid.
  */
 extern bool config_sys_is_set();
+
+/**
+ * @brief Initialize the configuration subsystem
+ * @ingroup config
+*/
+extern void config_module_init();
 
 #ifdef __cplusplus
 }

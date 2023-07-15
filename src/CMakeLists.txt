@@ -35,7 +35,6 @@ add_subdirectory(lib/sd_card)
 add_subdirectory(be)
 add_subdirectory(config)
 add_subdirectory(cmt)
-add_subdirectory(data)
 add_subdirectory(gfx)
 add_subdirectory(net)
 add_subdirectory(scorekeeper)
@@ -74,21 +73,6 @@ include_directories(
   ${PICO_SDK_PATH}/src/rp2_common/pico_cyw43_arch/include
   ${PICO_SDK_PATH}/src/rp2_common/pico_multicore/include
   ${PICO_SDK_PATH}/src/rp2040/hardware_structs/include
-  be
-  config
-  cmt
-  data
-  gfx
-  net
-  scorekeeper
-  test
-  ui
-  ui/cmd
-  ui/display/oled1306_i2c
-  ui/display/score_panel
-  ui/segments7
-  ui/term
-  util
   lib/sd_card/sd_driver
   lib/sd_card/ff15/source
 )

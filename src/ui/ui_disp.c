@@ -6,9 +6,11 @@
  *
 */
 #include "ui_disp.h"
-#include "config.h"
-#include "display_oled1306.h"
-#include "util.h"
+
+#include "config/config.h"
+#include "ui/display/oled1306_i2c/display_oled1306.h"
+#include "util/util.h"
+
 #include "hardware/rtc.h"
 #include "pico/printf.h"
 

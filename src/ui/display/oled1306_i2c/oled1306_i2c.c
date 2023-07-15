@@ -1,7 +1,7 @@
 /**
  * Copyright 2023 AESilky
  * Portions copyright (c) 2021 Raspberry Pi (Trading) Ltd.
- * 
+ *
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -9,10 +9,13 @@
 /**
  * Some portions from Raspberry Pi Pico example code to talk to an SSD1306-based OLED display
  * https://github.com/raspberrypi/pico-examples/tree/master/i2c/oled_i2c
- * 
+ *
  * (SSD1306 Datasheet: https://www.digikey.com/htmldatasheets/production/2047793/0/0/1/SSD1306.pdf)
  */
 #include "oled1306_i2c.h"
+
+#include <stdio.h>
+
 
 /*! @brief Memory area for the screen data pixel-bytes */
 uint8_t oled_disp_buf[OLED_BUF_LEN];
@@ -99,7 +102,7 @@ void oled_module_init() {
     oled_send_cmd(0x00);                            // no offset
 
     oled_send_cmd(OLED_SET_COM_PIN_CFG);            // set COM (common) pins hardware configuration
-    oled_send_cmd(0x10 | 0x02);                     // 00xx0010 
+    oled_send_cmd(0x10 | 0x02);                     // 00xx0010
                                                     // xx:00 = sequential rows, no left/right remap
                                                     // xx:01 = interleave rows, no left/right remap
                                                     // xx:10 = sequential rows, left/right remap
