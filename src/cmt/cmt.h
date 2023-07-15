@@ -15,7 +15,9 @@ extern "C" {
 
 #include <stdbool.h>
 #include <stdint.h>
-#include "gfx.h"
+
+#include "gfx/gfx.h"
+
 #include "pico/types.h"
 
 typedef enum _MSG_ID_ {

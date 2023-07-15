@@ -11,8 +11,8 @@
 extern "C" {
 #endif
 
-#include "cmt.h"
-#include "term.h"
+#include "cmt/cmt.h"
+#include "ui/term/term.h"
 
 #define UI_TERM_NAME_VERSION "Scores v0.1" // ZZZ - Read this from a common name-version
 
@@ -206,7 +206,7 @@ extern bool ui_term_handle_control_character(char c);
  *
  * @return Number of characters printed.
  */
-int ui_term_printf(const char* format, ...) __attribute__((format(_printf_, 1, 2)));
+extern int ui_term_printf(const char* format, ...) __attribute__((format(_printf_, 1, 2)));
 
 /**
  * @brief Print a string in the scrolling (code) area of the screen.

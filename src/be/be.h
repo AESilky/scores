@@ -13,7 +13,7 @@
 extern "C" {
 #endif
 
-#include "cmt.h"
+#include "cmt/cmt.h"
 
 #define BE_CORE_NUM 0
 

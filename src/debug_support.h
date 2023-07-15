@@ -10,7 +10,7 @@
 extern "C" {
 #endif
 
-#include "cmd_t.h" // Command processing type definitions
+#include "ui/cmd/cmd_t.h" // Command processing type definitions
 
 #include "stdbool.h"
 #include "stdint.h"

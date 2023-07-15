@@ -11,10 +11,11 @@
 
 #include "config_fops.h"
 
-#include "board.h"
-#include "util.h"
+#include "config_hndlr.h"
 
-#include "ff.h"
+#include "board.h"
+#include "util/util.h"
+
 #include "sd_card.h"
 #include "string.h"
 
@@ -29,8 +30,6 @@ static bool _initialized;
 static const char* _sys_cfg_filename = "scores.sys.cfg";
 #define _CFG_FILENAME_FORMAT "scores.%hu.cfg"
 
-static const struct _SYS_CFG_ITEM_HANDLER_CLASS_** _sys_cfg_handlers;
-static const cfg_item_handler_class_t** _cfg_handlers;
 static FATFS _fs;
 
 static FRESULT _cfo_mount_sd() {
@@ -70,7 +69,7 @@ int _process_cfg_line(config_t* config, char* line) {
     }
 
     // Run through the handlers and see if one handles it...
-    const cfg_item_handler_class_t** handlers = _cfg_handlers;
+    const cfg_item_handler_class_t** handlers = cfg_handlers();
     while (*handlers) {
         const cfg_item_handler_class_t* handler = *handlers;
         if (strcmp(handler->key, key) == 0) {
@@ -209,7 +208,7 @@ uint16_t _process_sys_cfg_line(config_sys_t* sys_cfg, char* line) {
 
 
     // Run through the handlers and see if one handles it...
-    const sys_cfg_item_handler_class_t** handlers = _sys_cfg_handlers;
+    const sys_cfg_item_handler_class_t** handlers = cfg_sys_handlers();
     while (*handlers) {
         const sys_cfg_item_handler_class_t* handler = *handlers;
         if (strcmp(handler->key, key) == 0) {
@@ -376,7 +375,7 @@ extern FRESULT cfo_save_cfg(const config_t* cfg, uint16_t cfg_num) {
     }
 
     // Write the rest of the config values out
-    const cfg_item_handler_class_t** handlers = _cfg_handlers;
+    const cfg_item_handler_class_t** handlers = cfg_handlers();
     while (*handlers) {
         const cfg_item_handler_class_t* handler = *handlers;
         int len = handler->writer(handler, cfg, buf, true);
@@ -430,7 +429,7 @@ FRESULT cfo_save_sys_cfg(const config_sys_t* sys_cfg) {
     }
 
     // Write the rest of the config values out
-    const sys_cfg_item_handler_class_t** handlers = _sys_cfg_handlers;
+    const sys_cfg_item_handler_class_t** handlers = cfg_sys_handlers();
     while (*handlers) {
         const sys_cfg_item_handler_class_t* handler = *handlers;
         len = handler->writer(handler, sys_cfg, buf, true);
@@ -452,10 +451,8 @@ FRESULT cfo_save_sys_cfg(const config_sys_t* sys_cfg) {
     return (fr);
 }
 
-void config_fops_module_init(const sys_cfg_item_handler_class_t** sys_cfg_handlers, const cfg_item_handler_class_t** cfg_handlers) {
+void config_fops_module_init() {
     assert(!_initialized);
-    _sys_cfg_handlers = sys_cfg_handlers;
-    _cfg_handlers = cfg_handlers;
     sd_init_driver();
     _fs.fs_type = 0;
 

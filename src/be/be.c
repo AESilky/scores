@@ -9,13 +9,16 @@
 */
 
 #include "be.h"
-#include "config.h"
-#include "cmt.h"
+
 #include "board.h"
 #include "debug_support.h"
-#include "net.h"
+
+#include "cmt/cmt.h"
+#include "config/config.h"
+#include "net/net.h"
 #include "scorekeeper/scorekeeper.h"
-#include "util.h"
+#include "util/util.h"
+
 #include "hardware/rtc.h"
 
 #define _BE_STATUS_PULSE_PERIOD 6999

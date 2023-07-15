@@ -11,11 +11,13 @@
 #include "system_defs.h"
 #include "board.h"
 #include "debug_support.h"
-#include "util.h"
+#include "util/util.h"
+
 #include "hardware/structs/nvic.h"
 #include "pico/mutex.h"
 #include "pico/stdlib.h"
 #include "pico/time.h"
+
 #include <stdlib.h>
 #include <string.h>
 

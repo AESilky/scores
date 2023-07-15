@@ -29,7 +29,7 @@
 extern "C" {
 #endif
 
-#include "font_7segment.h"
+#include "ui/segments7/font_7segment.h"
 
 #include <stdbool.h>
 #include <stdint.h>

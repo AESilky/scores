@@ -9,17 +9,17 @@
 */
 #include "system_defs.h"
 #include "ui.h"
-
-#include "board.h"
-#include "cmd.h"
-#include "cmt.h"
-#include "config.h"
-#include "core1_main.h"
-#include "multicore.h"
-#include "panel.h"
-#include "util.h"
 #include "ui_disp.h"
 #include "ui_term.h"
+#include "display/score_panel/panel.h"
+
+#include "board.h"
+#include "cmd/cmd.h"
+#include "cmt/cmt.h"
+#include "cmt/core1_main.h"
+#include "cmt/multicore.h"
+#include "config/config.h"
+#include "util/util.h"
 
 #include "hardware/rtc.h"
 
@@ -101,7 +101,7 @@ static void _handle_be_initialized(cmt_msg_t* msg) {
 
 static void _handle_config_changed(cmt_msg_t* msg) {
     // Update things that depend on the current configuration.
-    const config_t* cfg = config_current();
+    //const config_t* cfg = config_current();
 }
 
 /**

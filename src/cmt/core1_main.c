@@ -12,9 +12,11 @@
 #include "core1_main.h"
 
 #include "cmt.h"
-#include "board.h"
 #include "multicore.h"
-#include "ui.h"
+
+#include "board.h"
+#include "ui/ui.h"
+
 #include "pico/multicore.h"
 
 void core1_main() {

@@ -12,7 +12,8 @@ extern "C" {
 #endif
 
 #include "cmd_t.h"
-#include "cmt.h"
+
+#include "cmt/cmt.h"
 
 
 #define CMD_WAKEUP_CHAR ':'

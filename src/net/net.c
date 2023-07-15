@@ -6,8 +6,10 @@
  *
  */
 #include "net.h"
+
 #include "board.h"
-#include "util.h"
+
+#include "util/util.h"
 
 #include "hardware/rtc.h"
 #include "pico/time.h"

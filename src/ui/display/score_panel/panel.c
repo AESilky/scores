@@ -47,9 +47,12 @@
 */
 
 #include "panel.h"
+
 #include "board.h"
-#include "segments7.h"
 #include "system_defs.h"
+
+#include "ui/segments7/segments7.h"
+
 #include "hardware/irq.h"
 #include "hardware/pwm.h"
 

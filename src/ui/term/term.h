@@ -24,7 +24,7 @@ extern "C" {
 #include <stddef.h>
 #include <stdint.h>
 
-#include "gfx.h"
+#include "gfx/gfx.h"
 
 /**
  * @brief Function prototype for the notify on input handler.
