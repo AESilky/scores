@@ -1,3 +1,18 @@
+# IDE/OS files
+.DS_Store
+
+# Build and Output
+build/
+
+# Generated / Intermediate
+**/CMakeCache.txt
+**/CMakePresets.json
+**/CTestTestfile.cmake
+**/CPackConfig.cmake
+**/cmake_install.cmake
+**/install_manifest.txt
+**/compie_commands.json
+
 # Prerequisites
 *.d
 
