@@ -13,7 +13,9 @@
 #include "config_hndlr.h"
 
 #include "board.h"
+#include "be/be.h"
 #include "cmt/cmt.h"
+#include "display/oled1106_spi/display_oled1106.h"
 #include "ui/ui_term.h"
 #include "util/util.h"
 
@@ -40,7 +42,18 @@ typedef struct _CFG_W_MARKER_ {
     config_t config;
 } _cfg_w_marker_t;
 
-static config_sys_t _system_cfg = { 1, false, 0.0, -1, NULL, NULL };
+static config_sys_t _system_cfg = { 
+    false,  // Loaded
+    0.0,    // Config version
+    -1,     // User config at boot
+    true,   // IR1 is Remote Control
+    true,   // IR2 is Remote Control
+    0,      // Panel type (0 is NUMERIC)
+    0.0,    // Timezone offset
+    NULL,   // WiFi SSID (pointer)
+    NULL,   // WiFi Password (pointer)
+};
+
 static uint16_t _sys_not_init_flags;
 
 static int _current_cfg_number;
@@ -64,6 +77,7 @@ extern config_t* config_clear(config_t* cfg) {
             free(cfg->name);
             cfg->name = NULL;
         }
+        cfg->long_press = SWITCH_LONGPRESS_DEFAULT;
         cfg->sound = false;
     }
     return (cfg);
@@ -72,6 +86,8 @@ extern config_t* config_clear(config_t* cfg) {
 config_t* config_copy(config_t* cfg_dest, const config_t* cfg_source) {
     if (cfg_dest && cfg_source) {
         config_clear(cfg_dest); // Assure that alloc'ed values are freed
+        cfg_dest->name = str_value_create(cfg_source->name);
+        cfg_dest->long_press = cfg_source->long_press;
         cfg_dest->sound = cfg_source->sound;
     }
     return (cfg_dest);
@@ -129,16 +145,18 @@ extern bool config_load(int config_num) {
 
 void config_make_current(config_t* new_config) {
     if (new_config) {
-        config_free(_current_cfg);
+        config_t* old_current = _current_cfg;
         _current_cfg = new_config;
+        config_free(old_current);
         config_indicate_changed();
     }
 }
 
 void config_make_current_w_num(config_t* new_config, int config_num) {
     if (new_config && config_num > 0 && config_num < 10) {
-        config_free(_current_cfg);
+        config_t* old_current = _current_cfg;
         _current_cfg = new_config;
+        config_free(old_current);
         _current_cfg_number = config_num;
         config_indicate_changed();
     }
@@ -153,9 +171,12 @@ config_t* config_new(const config_t* init_values) {
     if (NULL != cfgwm) {
         cfgwm->marker = _CFG_MEM_MARKER_;
         cfg = &(cfgwm->config);
+        cfg->name = NULL; // Null out the name so `clear` doesn't ry to free it.
+        config_clear(cfg);
         if (NULL != init_values) {
             cfg->cfg_version = init_values->cfg_version;
             cfg->name = str_value_create(init_values->name);
+            cfg->long_press = init_values->long_press;
             cfg->sound = init_values->sound;
         }
     }
@@ -209,7 +230,7 @@ extern bool config_set_boot(int config_num) {
 // Initialization
 // ============================================================================
 
-void config_module_init() {
+int config_module_init() {
     static bool _module_initialized = false;
     if (_module_initialized) {
         panic("config module already initialized.");
@@ -218,6 +239,7 @@ void config_module_init() {
 
     // Set default values in the system config
     _system_cfg.cfg_version = CONFIG_VERSION;
+    _system_cfg.is_set = false;
     _system_cfg.boot_cfg_number = -1; // Invalid number as flag
     _system_cfg.wifi_ssid = NULL;
     _system_cfg.wifi_password = NULL;
@@ -225,7 +247,6 @@ void config_module_init() {
     // Create a config object to use as the current
     config_t* cfg = config_new(NULL);
     _current_cfg = cfg;
-    cfg->cfg_version = CONFIG_VERSION;
 
     // Initialize the item handlers and file operations modules
     config_hndlr_module_init();
@@ -237,11 +258,13 @@ void config_module_init() {
         // Something wasn't initialized. See if we got the config number.
         if (_sys_not_init_flags & _SYSCFG_NOT_LOADED) {
             error_printf(false, "Config - Unable to load system configuration.\n");
-            return;
+            disp_string(5, 0, "SysCfg load fail", false, true);
+            return (_sys_not_init_flags);
         }
         if (_sys_not_init_flags & _SYSCFG_BCN_ID) {
             // Nope... Default to #1
             error_printf(false, "Config - Boot configuration number is not valid. Using '1'.\n");
+            disp_string(5, 0, "Cfg# invalid", false, true);
             _system_cfg.boot_cfg_number = 1;
         }
     }
@@ -249,5 +272,7 @@ void config_module_init() {
     FRESULT fr = cfo_read_cfg(cfg, _current_cfg_number);
     if (fr != FR_OK) {
         error_printf(false, "Config - Could not load configuration (#%hu).\n", _current_cfg_number);
+        disp_string(5, 0, "Cfg load fail", false, true);
     }
+    return (0);
 }

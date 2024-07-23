@@ -265,10 +265,15 @@ uint16_t cfo_read_sys_cfg(config_sys_t * sys_cfg) {
         | _SYSCFG_BCN_ID
         | _SYSCFG_TZ_ID
         | _SYSCFG_WS_ID
+        | _SYSCFG_DWB_ID
+        | _SYSCFG_IR1_RC
+        | _SYSCFG_IR2_RC
+        | _SYSCFG_PANEL_TYPE
         ); // Will clear as set
     FRESULT fr;
     FIL fil;
     char buf[100];
+    sys_cfg->is_set = false;
 
     // Mount drive
     fr = _cfo_mount_sd();

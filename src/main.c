@@ -14,6 +14,8 @@
 //
 #include "be/be.h"
 #include "ui/ui.h"
+//
+#include "display/oled1106_spi/display_oled1106.h"
 
 #define DOT_MS 60 // Dot at 20 WPM
 #define UP_MS  DOT_MS
@@ -36,22 +38,30 @@ static const int32_t say_hi[] = {
     1000, // Pause before repeating
     0 };
 
-//static int32_t qbf[] = { -32767, 2, -460, 180, -230, 60, -60, 60, -60, 60, -60, 60, -230, 60, -460, 60, -60, 60, -60, 180, 60, 60, -230, 60, -60, 60, -60, 180 };
-
 int main()
 {
     // useful information for picotool
-    bi_decl_if_func_used(bi_2pins_with_func(PICO_DEFAULT_UART_RX_PIN, PICO_DEFAULT_UART_TX_PIN, GPIO_FUNC_UART));
-    bi_decl(bi_program_description("Scoreboard Control for AES Scoreboard w/Remote"));
+    bi_decl(bi_program_description("Control for AES Scoreboard"));
 
     // Board/base level initialization
-    board_init();
+    if (board_init() != 0) {
+        panic("Board init failed.");
+    }
 
     // Indicate that we are awake
     if (debug_mode_enabled()) {
-        tone_sound_pattern(150);
+        tone_sound_duration(250);
     }
+    int sc = sizeof(char);
+    int ss = sizeof(short);
+    int si = sizeof(int);
+    int sl = sizeof(long);
+    debug_printf(true, "Size of char: %d  short: %d  int: %d  long: %d\n", sc, ss, si, sl);
+    
     led_on_off(say_hi);
+
+    sleep_ms(2000);
+    //disp_font_test();
 
     // Set up the Backend (needs to be done before starting the UI)
     be_module_init();

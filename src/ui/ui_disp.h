@@ -1,7 +1,7 @@
 /**
- * scores User Interface - On the display, rotary, touch.
+ * scores User Interface - On the display.
  *
- * Copyright 2023 AESilky
+ * Copyright 2023-24 AESilky
  * SPDX-License-Identifier: MIT License
  *
 */
@@ -24,10 +24,8 @@ extern "C" {
 extern void ui_disp_build(void);
 
 /**
- * @brief Print a string in the scrolling (code) area of the screen.
+ * @brief Print a string in the scrolling area of the screen.
  * @ingroup ui
- *
- * If code is displaying, this will print a newline and then the string.
  *
  * @param str The string to print.
  */

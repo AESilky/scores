@@ -16,7 +16,7 @@
 
 #include "board.h"
 #include "config/config.h"
-#include "ui/term/term.h"
+#include "term/term.h"
 #include "util/util.h"
 
 #include "hardware/rtc.h"
