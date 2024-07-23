@@ -1,5 +1,5 @@
 /**
- * KOB Network functionaly
+ * Network functionaly
  *
  * Copyright 2023 AESilky
  * SPDX-License-Identifier: MIT License
@@ -14,14 +14,65 @@
 #include "hardware/rtc.h"
 #include "pico/time.h"
 
-#define ADDR_PORT_SEP ':'
+#include <stdlib.h>
+#include <time.h>
 
+#define ADDR_PORT_SEP ':'
+static bool _wifi_connected = false;
+
+
+#ifdef BOARD_IS_PICOW  // Only provide WiFi features if this is a Pico-W
 static char _wifi_ssid[NET_SSID_MAX_LEN];
 static char _wifi_password[NET_PASSWORD_MAX_LEN];
 
-static bool _wifi_connected = false;
-
 // Forward definitions...
+/**
+ * @brief Function prototype for UDP Bind response handler.
+ * @ingroup wire
+ *
+ * @param status The status from the operation.
+ * @param udp_pcb The udp_pcb that was bound, or NULL if an error occurred.
+ */
+typedef void (*udp_bind_handler_fn)(err_enum_t status, struct udp_pcb* udp_pcb);
+
+/**
+ * @brief Function prototype for UDP single operation result handler.
+ * @ingroup wire
+ *
+ * @param status The status from the operation.
+ * @param p The PBUF from the UDP operation. It is the handler's responsibility to free the pbuf.
+ */
+typedef void (*udp_sop_result_handler_fn)(err_enum_t status, pbuf_t* p, void* handler_data);
+
+
+/**
+ * @brief Send a UDP message and process the response message.
+ * @ingroup wire
+ *
+ * @param hostname The fully qualified name of the host. This will be used to do a DNS lookup to obtain an IP address.
+ * @param port A port number to use when sending the request.
+ * @param bind_handler A function to be called after the hostname is resolved and a UDP socket is bound.
+ *
+ * @returns Error number (from err.h). ERR_OK or ERR_INPROGRESS is returned on success.
+ */
+err_enum_t udp_socket_bind(const char* hostname, uint16_t port, udp_bind_handler_fn bind_handler);
+
+/**
+ * @brief Perform a single UDP operation, consisting of sending a message and getting a response message.
+ * @ingroup wire
+ *
+ * @param hostname The fully qualified name of the host. This will be used to do a DNS lookup to obtain an IP address.
+ * @param port A port number to use when sending the request.
+ * @param p A PBUF structure containing the message to be sent.
+ * @param timeout A millisecond timeout value to use for the request/response. If a timeout occurs, the result handler
+ *          will be called with a status of ERR_TOUT and a NULL PBUF.
+ * @param result_handler Function called with the result when it is received.
+ * @param handler_data Data that is passed to the result handler along with the response.
+ *
+ * @returns Error number (from err.h). ERR_OK or ERR_INPROGRESS is returned on success.
+ */
+err_enum_t udp_single_operation(const char* hostname, uint16_t port, pbuf_t* p, uint32_t timeout, udp_sop_result_handler_fn result_handler, void* handler_data);
+
 static void _ntp_response_handler(err_enum_t status, pbuf_t* p, void* handler_data);
 static void _udp_bind_dns_found(const char* hostname, const ip_addr_t* ipaddr, void* arg);
 static int64_t _udp_bind_dns_timeout_handler(alarm_id_t id, void* request_state);
@@ -56,45 +107,6 @@ typedef struct _ntp_handler_data {
     float tz_offset;
 } ntp_handler_data_t;
 
-
-// ====================================================================
-// Public functions
-// ====================================================================
-
-int host_from_hostport(char* buf, uint32_t maxlen, const char* host_and_port) {
-    int len_of_host;
-
-    if (!host_and_port) {
-        *buf = '\000';
-        return (0);
-    }
-    // See if there is a ':'
-    char* sep = strchr(host_and_port, ADDR_PORT_SEP);
-    if (sep) {
-        // There is a ':', get the string up to it
-        len_of_host = sep - host_and_port;
-    }
-    else {
-        len_of_host = strlen(host_and_port);
-    }
-    if (maxlen > len_of_host) {
-        strcpynt(buf, host_and_port, len_of_host);
-    }
-    else {
-        strcpynt(buf, host_and_port, maxlen);
-    }
-
-    return (len_of_host);
-}
-
-uint16_t port_from_hostport(const char* host_and_port, uint16_t port_default) {
-    // Is there a ':'?
-    char* sep = strchr(host_and_port, ADDR_PORT_SEP);
-    if (NULL == sep) {
-        return port_default;
-    }
-    return (atoi(sep + 1));
-}
 
 err_enum_t udp_socket_bind(const char* hostname, uint16_t port, udp_bind_handler_fn bind_handler) {
     err_enum_t status = ERR_INPROGRESS;
@@ -170,14 +182,57 @@ err_enum_t udp_single_operation(const char* hostname, uint16_t port, pbuf_t* p, 
     return (status);
 }
 
+#endif // BOARD_IS_PICOW
+
+// ====================================================================
+// Public functions
+// ====================================================================
+
+int host_from_hostport(char* buf, uint32_t maxlen, const char* host_and_port) {
+    int len_of_host;
+
+    if (!host_and_port) {
+        *buf = '\000';
+        return (0);
+    }
+    // See if there is a ':'
+    char* sep = strchr(host_and_port, ADDR_PORT_SEP);
+    if (sep) {
+        // There is a ':', get the string up to it
+        len_of_host = sep - host_and_port;
+    }
+    else {
+        len_of_host = strlen(host_and_port);
+    }
+    if (maxlen > len_of_host) {
+        strcpynt(buf, host_and_port, len_of_host);
+    }
+    else {
+        strcpynt(buf, host_and_port, maxlen);
+    }
+
+    return (len_of_host);
+}
+
+uint16_t port_from_hostport(const char* host_and_port, uint16_t port_default) {
+    // Is there a ':'?
+    char* sep = strchr(host_and_port, ADDR_PORT_SEP);
+    if (NULL == sep) {
+        return port_default;
+    }
+    return (atoi(sep + 1));
+}
+
 bool wifi_connect() {
-    if (!_wifi_connected) {
+#ifdef BOARD_IS_PICOW
+    if (WiFiAvailable && !_wifi_connected) {
         if (cyw43_arch_wifi_connect_timeout_ms(_wifi_ssid, _wifi_password, CYW43_AUTH_WPA2_AES_PSK, 10000)) {
             error_printf(false, "failed to connect\n");
             return (false);
         }
         _wifi_connected = true;
     }
+#endif // BOARD_IS_PICOW
     return (true);
 }
 
@@ -186,25 +241,32 @@ bool wifi_connected() {
 }
 
 void wifi_set_creds(const char* ssid, const char* pw) {
+#ifdef BOARD_IS_PICOW
     strcpynt(_wifi_ssid, ssid, NET_SSID_MAX_LEN);
     strcpynt(_wifi_password, pw, NET_PASSWORD_MAX_LEN);
+#endif // BOARD_IS_PICOW
 }
 
 err_enum_t network_update_rtc(float tz_offset) {
-    // Build the NTP request message...
-    pbuf_t* p = pbuf_alloc(PBUF_TRANSPORT, NTP_MSG_LEN, PBUF_POOL);
-    uint8_t* req = (uint8_t*)p->payload;
-    memset(req, 0, NTP_MSG_LEN);
-    req[0] = 0x1b; // NTP Request: Version=3 Mode=3 (client)
-    ntp_handler_data_t* handler_data = (ntp_handler_data_t*)malloc(sizeof(ntp_handler_data_t));
-    handler_data->tz_offset = tz_offset;
+#ifdef BOARD_IS_PICOW
+    if (WiFiAvailable) {
+        // Build the NTP request message...
+        pbuf_t* p = pbuf_alloc(PBUF_TRANSPORT, NTP_MSG_LEN, PBUF_POOL);
+        uint8_t* req = (uint8_t*)p->payload;
+        memset(req, 0, NTP_MSG_LEN);
+        req[0] = 0x1b; // NTP Request: Version=3 Mode=3 (client)
+        ntp_handler_data_t* handler_data = (ntp_handler_data_t*)malloc(sizeof(ntp_handler_data_t));
+        handler_data->tz_offset = tz_offset;
 
-    err_enum_t status = udp_single_operation(NTP_SERVER, NTP_PORT, p, NTP_TIMEOUT, _ntp_response_handler, (void*)handler_data);
-    if (status != ERR_OK && status != ERR_INPROGRESS) {
-        // Operation initialization failed. Need to free the PBUF we created...
-        pbuf_free(p);
+        err_enum_t status = udp_single_operation(NTP_SERVER, NTP_PORT, p, NTP_TIMEOUT, _ntp_response_handler, (void*)handler_data);
+        if (status != ERR_OK && status != ERR_INPROGRESS) {
+            // Operation initialization failed. Need to free the PBUF we created...
+            pbuf_free(p);
+        }
+        return (status);
     }
-    return (status);
+#endif // BOARD_IS_PICOW
+    return (ERR_OK);
 }
 
 
@@ -212,6 +274,7 @@ err_enum_t network_update_rtc(float tz_offset) {
 // Internal functions
 // ====================================================================
 
+#ifdef BOARD_IS_PICOW
 
 // Called with pre-processed results of NTP operation
 static void _ntp_set_datetime(err_enum_t status, time_t* seconds_from_epoch, float tz_offset) {
@@ -432,3 +495,4 @@ static int64_t _udp_sop_timeout_handler(alarm_id_t id, void* request_state) {
 
     return 0; // Don't reschedule this alarm.
 }
+#endif // BOARD_IS_PICOW

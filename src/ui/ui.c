@@ -10,8 +10,8 @@
 #include "system_defs.h"
 #include "ui.h"
 #include "ui_disp.h"
+#include "ui_remote_ctrl.h"
 #include "ui_term.h"
-#include "display/score_panel/panel.h"
 
 #include "board.h"
 #include "cmd/cmd.h"
@@ -19,6 +19,10 @@
 #include "cmt/core1_main.h"
 #include "cmt/multicore.h"
 #include "config/config.h"
+#include "curswitch/curswitch.h"
+#include "rc/rc.h"
+#include "scorekeeper/scorekeeper.h"
+#include "scorekeeper/sk_tod.h"
 #include "util/util.h"
 
 #include "hardware/rtc.h"
@@ -28,25 +32,40 @@
 
 #define _UI_STATUS_PULSE_PERIOD 7001
 
+typedef enum _UI_App_ID_ {
+    APP_NONE    = 0,
+    APP_SCORES  = 1,
+    APP_SETUP   = 2,
+} ui_app_id_t;
+
+static ui_app_id_t _app_active;
+static bool _initialized = false;
+
 // Internal, non message handler, function declarations
-static void _ui_init_terminal_shell();
-static void _user_input_sw_irq_handler(uint gpio, uint32_t events);
+void _app_scores_switch_action(switch_bank_t bank, switch_id_t sw_id, bool pressed, bool long_press, bool repeat);
+void _app_setup_switch_action(switch_bank_t bank, switch_id_t sw_id, bool pressed, bool long_press, bool repeat);
+void _ui_init_terminal_shell();
 
 // Message handler functions...
 static void _handle_be_initialized(cmt_msg_t* msg);
 static void _handle_config_changed(cmt_msg_t* msg);
+static void _handle_curswitch_action(cmt_msg_t* msg);
 static void _handle_init_terminal(cmt_msg_t* msg);
+static void _handle_input_switch_pressed(cmt_msg_t* msg);
+static void _handle_input_switch_released(cmt_msg_t* msg);
+static void _handle_switch_longpress(cmt_msg_t* msg);
 
 static void _ui_idle_function_1();
 
-static cmt_msg_t _msg_ui_cmd_start;
 static cmt_msg_t _msg_ui_initialized;
 
 static const msg_handler_entry_t _be_initialized_handler_entry = { MSG_BE_INITIALIZED, _handle_be_initialized };
-static const msg_handler_entry_t _cmd_key_pressed_handler_entry = { MSG_CMD_KEY_PRESSED, cmd_attn_handler };
 static const msg_handler_entry_t _cmd_init_terminal_handler_entry = { MSG_CMD_INIT_TERMINAL, _handle_init_terminal };
 static const msg_handler_entry_t _config_changed_handler_entry = { MSG_CONFIG_CHANGED, _handle_config_changed };
-static const msg_handler_entry_t _input_char_ready_handler_entry = { MSG_INPUT_CHAR_READY, _ui_term_handle_input_char_ready };
+static const msg_handler_entry_t _input_sw_pressed_handler_entry = { MSG_INPUT_SW_PRESS, _handle_input_switch_pressed };
+static const msg_handler_entry_t _input_sw_released_handler_entry = { MSG_INPUT_SW_RELEASE, _handle_input_switch_released };
+static const msg_handler_entry_t _curswitch_action_handler_entry = { MSG_SWITCH_ACTION, _handle_curswitch_action };
+static const msg_handler_entry_t _switch_longpress_handler_entry = { MSG_SWITCH_LONGPRESS, _handle_switch_longpress };
 
 /**
  * @brief List of handler entries.
@@ -56,8 +75,11 @@ static const msg_handler_entry_t _input_char_ready_handler_entry = { MSG_INPUT_C
  *
  */
 static const msg_handler_entry_t* _handler_entries[] = {
-    &_input_char_ready_handler_entry,
-    &_cmd_key_pressed_handler_entry,
+    &_sk_tod_update_handler_entry,
+    &_curswitch_action_handler_entry,
+    &_switch_longpress_handler_entry,
+    &_input_sw_pressed_handler_entry,
+    &_input_sw_released_handler_entry,
     &_config_changed_handler_entry,
     &_cmd_init_terminal_handler_entry,
     &_be_initialized_handler_entry,
@@ -93,10 +115,6 @@ static void _handle_be_initialized(cmt_msg_t* msg) {
     // The Backend has reported that it is initialized.
     // Since we are responding to a message, it means we
     // are also initialized, so -
-    //
-    _msg_ui_cmd_start.id = MSG_CMD_KEY_PRESSED;
-    _msg_ui_cmd_start.data.c = CMD_WAKEUP_CHAR;
-    postUIMsgBlocking(&_msg_ui_cmd_start);
 }
 
 static void _handle_config_changed(cmt_msg_t* msg) {
@@ -118,57 +136,244 @@ static void _handle_init_terminal(cmt_msg_t* msg) {
     _ui_init_terminal_shell();
 }
 
+/**
+ * @brief Message handler for MSG_INPUT_SW_PRESS
+ * @ingroup ui
+ *
+ * The BE has determined that the input switch has been pressed.
+ *
+ * @param msg Nothing in the data of this message.
+ */
+static void _handle_input_switch_pressed(cmt_msg_t* msg) {
+    // Check that it's still pressed...
+    if (user_switch_pressed()) {
+        debug_printf(false, "Input switch pressed\n");
+    }
+}
+
+/**
+ * @brief Message handler for MSG_INPUT_SW_RELEASE
+ * @ingroup ui
+ *
+ * The BE has determined that the input switch has been released.
+ *
+ * @param msg Nothing in the data of this message.
+ */
+static void _handle_input_switch_released(cmt_msg_t* msg) {
+    debug_printf(false, "Input switch released\n");
+}
+
+/**
+ * @brief Message handler for MSG_SWITCH_ACTION
+ * @ingroup ui
+ * 
+ * The Cursor Switch processing determined that a switch was pushed
+ * or released.
+ * 
+ * @param msg Contains a switch_action_data_t structure with information
+ *              about the action.
+ */
+static void _handle_curswitch_action(cmt_msg_t* msg) {
+    switch_bank_t bank = msg->data.sw_action.bank;
+    switch_id_t sw_id = msg->data.sw_action.switch_id;
+    bool pressed = msg->data.sw_action.pressed;
+    char* state;
+    const char* swname = curswitch_shortname_for_swid(sw_id);
+    state = (pressed ? "Pressed" : "Released");
+    debug_printf(false, "Bank%d %s %s\n", bank, swname, state);
+    switch (_app_active) {
+        case APP_SCORES:
+            _app_scores_switch_action(bank, sw_id, pressed, false, false);
+            break;
+        case APP_SETUP:
+            _app_setup_switch_action(bank, sw_id, pressed, false, false);
+            break;
+        case APP_NONE:
+            // No application active. Nothing to do.
+            break;
+    }
+}
+
+/**
+ * @brief Message handler for MSG_SWITCH_LONGPRESS
+ * @ingroup ui
+ * 
+ * A Cursor Switch was long-pressed.
+ * 
+ * @param msg Contains a switch_action_data_t structure with information
+ *              about the action.
+ */
+static void _handle_switch_longpress(cmt_msg_t* msg) {
+    switch_bank_t bank = msg->data.sw_action.bank;
+    switch_id_t sw_id = msg->data.sw_action.switch_id;
+    bool repeat = msg->data.sw_action.repeat;
+    const char* swname = curswitch_shortname_for_swid(sw_id);
+    const char* repeatstr = (repeat ? " repeat" : "");
+    debug_printf(false, "Bank%d %s Long Press%s\n", bank, swname, repeatstr);
+    switch (_app_active) {
+        case APP_SCORES:
+            _app_scores_switch_action(bank, sw_id, true, true, repeat);
+            break;
+        case APP_SETUP:
+            _app_setup_switch_action(bank, sw_id, true, true, repeat);
+            break;
+        case APP_NONE:
+            // No application active. Nothing to do.
+            break;
+    }
+}
 
 // ============================================
 // Internal functions
 // ============================================
 
-static void _ui_init_terminal_shell() {
+void _app_scores_switch_action(switch_bank_t bank, switch_id_t sw_id, bool pressed, bool long_press, bool repeat) {
+    if (!pressed) {
+        return;
+    }
+    // Handle the switches for keeping score
+    int sv;
+    // Bank1 is for the A score, Bank2 for B
+    sk_value_ctrl_t vctrl = (bank == SWBANK1 ? SKVALUE_A : SKVALUE_B);
+
+    // If this is a long_press of SW_ENTER, but not a repeat, set the score to 11
+    if (long_press && !repeat) {
+        int current_score = scorekeeper_get_value(vctrl);
+        if (current_score > 11) {
+            scorekeeper_set_value(vctrl, 11);
+        }
+        return;
+    }
+    // If this is a repeat long_press of SW_ENTER, set the score to 0
+    if (long_press && repeat) {
+        scorekeeper_set_value(vctrl, 0);
+        return;
+    }
+
+    // Get a value to change the score by based on the switch
+    switch (sw_id) {
+        case SW_LEFT:
+            // Increase score by 3
+            sv = 3;
+            break;
+        case SW_HOME:
+            // Increase score by 2
+            sv = 2;
+            break;
+        case SW_RIGHT:
+            // Increase score by 1
+            sv = 1;
+            break;
+        case SW_ENTER:
+            // Decreate score by 1
+            sv = -1;
+            break;
+        default:
+            // We don't expect the other switches to be installed
+            // but we'll handle added values
+            if (sw_id == SW_UP) {
+                sv = 5;
+            }
+            else if (sw_id == SW_DOWN) {
+                sv = -5;
+            }
+            else {
+                sv = 0;
+            }
+            break;
+    }
+    scorekeeper_add_value(vctrl, sv);
+}
+
+void _app_setup_switch_action(switch_bank_t bank, switch_id_t sw_id, bool pressed, bool long_press, bool repeat) {
+
+}
+
+void _ui_init_terminal_shell() {
     ui_term_build();
     cmd_module_init();
 }
 
-void _ui_gpio_irq_handler(uint gpio, uint32_t events) {
-    switch (gpio) {
-        case USER_INPUT_SW:
-            _user_input_sw_irq_handler(gpio, events);
-            break;
+
+/////////////////////////////////////////////////////////////////////
+// Command processor support
+/////////////////////////////////////////////////////////////////////
+//
+static int _remote_code_cmd(int argc, char** argv, const char* unparsed) {
+    if (argc > 1) {
+        // The args are the remote code to simulate. Valid codes are -255 to 0 to 255.
+        // Negative codes indicate a repeat of the positive code.
+        int i = 1;
+        // Check the values entered
+        while (i < argc) {
+            int code = atoi(argv[i]);
+            if (code < -255 || code > 255) {
+                ui_term_printf("Remote code value %d must be -255 to 255 (negative indicates a repeat)\n", i);
+                return (-1);
+            }
+            i++;
+        }
+        // Process the values entered
+        i = 1;
+        while (i < argc) {
+            int code = atoi(argv[i++]);
+            rc_handle_code(code);
+        }
     }
+    else {
+        ui_term_printf("No values entered.\n");
+        return (-1);
+    }
+
+    return (0);
 }
 
-static void _user_input_sw_irq_handler(uint gpio, uint32_t events) {
-    if (events & GPIO_IRQ_EDGE_FALL) {
-        debug_printf(false, "User Input Switch pressed.\n");
-    }
-    if (events & GPIO_IRQ_EDGE_RISE) {
-        debug_printf(false, "User Input Switch released.\n");
-    }
-}
+
+const cmd_handler_entry_t cmd_ui_remote_code_entry = {
+    _remote_code_cmd,
+    1,
+    "rc",
+    "code",
+    "Simulate receiving a code from the remote.",
+};
 
 
 // ============================================
 // Public functions
 // ============================================
 
+/**
+ * @brief Start the UI - The Core 1 message loop.
+ */
 void start_ui(void) {
     static bool _started = false;
     // Make sure we aren't already started and that we are being called from core-0.
     assert(!_started && 0 == get_core_num());
     _started = true;
+    
     start_core1(); // The Core-1 main starts the UI
 }
 
+bool ui_initialized() {
+    return _initialized;
+}
+
+/**
+ * @brief Initialize the User Interface (now that the message loop is running).
+ */
 void ui_module_init() {
-    // Initialize the score panel
-    score_panel_module_init();
-    panel_allow_gpio_write(true);
-
-    gpio_set_irq_enabled_with_callback(IRQ_USER_INPUT_SW, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL, true, &_ui_gpio_irq_handler);
-
+    _app_active = APP_NONE;
     ui_disp_build();
     _ui_init_terminal_shell();
+    // Initialize the score keeper
+    scorekeeper_module_init();
+    // Register the Remote Control handlers
+    ui_rc_register_handlers();
+    // Start out in the Scorekeeper functionality (switches to Setup at times)
+    _app_active = APP_SCORES;
 
     // Let the Backend know that we are initialized
+    _initialized = true;
     _msg_ui_initialized.id = MSG_UI_INITIALIZED;
     postBEMsgBlocking(&_msg_ui_initialized);
 }

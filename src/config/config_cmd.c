@@ -16,6 +16,10 @@
 #include "ui/ui_term.h"
 #include "util/util.h"
 
+#include <ctype.h>
+#include <stdio.h>
+#include <stdlib.h>
+
  // ============================================================================
  // User command processing
  // ============================================================================
@@ -47,7 +51,7 @@ static int _config_cmd_configure(int argc, char** argv, const char* unparsed) {
 
     // If there are parameters, try to set values
     if (argc > 1) {
-        // Create a config put set the values into. That way, if there is an error the
+        // Create a config to set the values into. That way, if there is an error the
         // config in use is left unchanged.
         newcfg = config_new(config_current());
         int argn = 1;
@@ -161,6 +165,7 @@ static int _config_cmd_configure(int argc, char** argv, const char* unparsed) {
         }
         // At this point we've processed all of the supplied arguments. Set the config
         config_make_current(newcfg);
+        newcfg = NULL;
     }
 
     // List the current configuration
