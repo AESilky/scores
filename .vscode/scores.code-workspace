@@ -1,0 +1,25 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"spi.h": "c",
+			"re_pbsw.h": "c",
+			"font_7segment.h": "c",
+			"irq.h": "c",
+			"debug_support.h": "c",
+			"system_defs.h": "c",
+			"stdlib.h": "c",
+			"stdio.h": "c",
+			"pico.h": "c",
+			"version.h": "c",
+			"types.h": "c",
+			"assert.h": "c",
+			"features.h": "c",
+			"features-time64.h": "c"
+		}
+	}
+}
