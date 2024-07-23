@@ -12,7 +12,7 @@ extern "C" {
 #endif
 
 #include "cmt/cmt.h"
-#include "ui/term/term.h"
+#include "term/term.h"
 
 #define UI_TERM_NAME_VERSION "Scores v0.1" // ZZZ - Read this from a common name-version
 
@@ -126,14 +126,6 @@ typedef void (*ui_term_getline_callback_fn)(char* line);
 typedef void (*ui_term_input_available_handler)(void);
 
 /**
- * @brief `MSG_INPUT_CHAR_READY` message handler.
- * @ingroup ui
- *
- * @param msg Nothing important in the message.
- */
-extern void _ui_term_handle_input_char_ready(cmt_msg_t* msg);
-
-/**
  * @brief Build (or rebuild) the UI on the terminal.
  * @ingroup ui
  */
@@ -198,6 +190,25 @@ extern void ui_term_getline_cancel(ui_term_input_available_handler input_handler
  * @return false If there isn't a handler for this character or the character isn't a control.
  */
 extern bool ui_term_handle_control_character(char c);
+
+/**
+ * @brief Indicates whether the last character printed was a newline.
+ *
+ * @return true If last printed was newline
+ * @return false If any other character
+ */
+extern bool ui_term_last_print_was_nl(void);
+
+/**
+ * @brief Set whether the last character printed was a newline.
+ *
+ * This is provided to allow setting or clearing this status when it is known that
+ * a newline was or wasn't printed through a mechanism that doesn't automatically
+ * set the status.
+ *
+ * @param set bool indicating that the last character was/wasn't a newline.
+ */
+extern void ui_term_last_print_was_nl_set(bool set);
 
 /**
  * @brief Version of `printf` that adds a leading newline if interrupting

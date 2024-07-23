@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 # Initialize pico_sdk from installed location
 # (note this can come from environment, CMake cache etc)
-set(PICO_BOARD pico_w CACHE STRING "Board type")
+set(PICO_BOARD "pico")
 set(PICO_USE_MALLOC_MUTEX 1)
 # Pull in Raspberry Pi Pico SDK (must be before project)
 include(pico_sdk_import.cmake)
@@ -35,9 +35,13 @@ add_subdirectory(lib/sd_card)
 add_subdirectory(be)
 add_subdirectory(config)
 add_subdirectory(cmt)
+add_subdirectory(curswitch)
+add_subdirectory(display)
 add_subdirectory(gfx)
 add_subdirectory(net)
-add_subdirectory(scorekeeper)
+add_subdirectory(panel)
+add_subdirectory(rc)
+add_subdirectory(term)
 add_subdirectory(test)
 add_subdirectory(util)
 add_subdirectory(ui)
@@ -54,7 +58,7 @@ pico_set_program_name(scores "Scores")
 pico_set_program_version(scores "0.1")
 
 # Use the UART while using the Picoprobe
-# For Release the USB will be better
+# Use the USB for stdio. UART is used to communicate with ZigBee module.
 pico_enable_stdio_uart(scores 1)
 pico_enable_stdio_usb(scores 0)
 
@@ -84,7 +88,11 @@ add_compile_definitions(
   PICO_USE_STACK_GUARDS
   PICO_STACK_SIZE=4096
   PICO_CORE1_STACK_SIZE=4096
+
   # PICO_DEBUG_MALLOC
+  PICO_MAX_SHARED_IRQ_HANDLERS=6u
+  PICO_STDIO_USB_CONNECTION_WITHOUT_DTR
+  PICO_STDIO_USB_SUPPORT_CHARS_AVAILABLE_CALLBACK
 )
 
 # Add the libraries required by the system to the build
@@ -93,12 +101,15 @@ target_link_libraries(scores
   config
   cmd
   cmt
+  curswitch
   display
+  fonts
   gfx
-  scores_test
   net
+  rc
   score_panel
   scorekeeper
+  scores_test
   segments7
   term
   ui
@@ -110,11 +121,15 @@ target_link_libraries(scores
   hardware_pio
   hardware_spi
   hardware_timer
-  pico_cyw43_arch_lwip_threadsafe_background
   pico_multicore
   pico_stdlib
   SD_FatFs
 )
+if(${PICO_BOARD} STREQUAL "pico_w")
+target_link_libraries(scores
+  pico_cyw43_arch_lwip_threadsafe_background
+)
+endif()
 
 pico_set_linker_script(scores ${CMAKE_SOURCE_DIR}/memmap_scores_custom.ld)
 

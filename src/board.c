@@ -4,7 +4,7 @@
  * Copyright 2023 AESilky
  * SPDX-License-Identifier: MIT License
  *
- * This sets up the Pico-W for use for scores.
+ * This sets up the Pico for use for scores.
  * It:
  * 1. Configures the GPIO Pins for the proper IN/OUT, pull-ups, etc.
  * 2. Calls the init routines for Config, UI (Display, Touch, rotary)
@@ -16,6 +16,7 @@
  * 4. Beep the buzzer a number of times
  *
 */
+#include "system_defs.h"
 
 #include "pico/stdio.h"
 #include "pico/stdlib.h"
@@ -30,19 +31,21 @@
 #include "hardware/spi.h"
 #include "hardware/timer.h"
 #include "pico/bootrom.h"
-#include "pico/cyw43_arch.h"
-
-#include "system_defs.h"
-
+#ifdef BOARD_IS_PICOW
+    #include "pico/cyw43_arch.h"
+#endif
 #include "config/config.h"
-#include "ui/display/oled1306_i2c/display_oled1306.h"
+#include "curswitch/curswitch.h"
+#include "display/oled1106_spi/display_oled1106.h"
 #include "board.h"
 #include "debug_support.h"
 #include "cmt/multicore.h"
 #include "net/net.h"
-#include "ui/display/score_panel/panel.h"
-#include "ui/term/term.h"
+#include "term/term.h"
+#include "panel/panel.h"
 #include "util/util.h"
+
+bool WiFiAvailable = false;
 
 // Internal function declarations
 
@@ -55,68 +58,54 @@ static int _format_printf_datetime(char* buf, size_t len);
  * This calls the init for each of the devices/subsystems.
  * If all is okay, it returns 0, else non-zero.
  *
- * Although each subsystem could (some might argue should) configure thier own Pico
+ * Although each subsystem could (some might argue should) configure their own Pico
  * pins, having everything here makes the overall system easier to understand
  * and helps assure that there are no conflicts.
 */
 int board_init() {
     int retval = 0;
 
+#ifdef BOARD_IS_PICOW
+    if (!cyw43_arch_init()) {
+        WiFiAvailable = true;
+    }
+#else
+    const uint LED_PIN = PICO_DEFAULT_LED_PIN;
+    gpio_init(LED_PIN);
+    gpio_set_dir(LED_PIN, GPIO_OUT);
+#endif
+
     stdio_init_all();
 
-    sleep_ms(50); // Ok to `sleep` as msg system not started
+    sleep_ms(80); // Ok to `sleep` as msg system not started
 
-    // Initialize the terminal library
-    term_module_init();
-
-    // Initialize the board RTC. It will be set correctly later when we
-    // have WiFi and can make a NTP call.
-    // Start on Sunday the 1st of January 2023 00:00:01
-    datetime_t t = {
-            .year = 2023,
-            .month = 01,
-            .day = 01,
-            .dotw = 0, // 0 is Sunday
-            .hour = 00,
-            .min = 00,
-            .sec = 01
-    };
-    rtc_init();
-    rtc_set_datetime(&t);
-    // clk_sys is >2000x faster than clk_rtc, so datetime is not updated immediately when rtc_set_datetime() is called.
-    // tbe delay is up to 3 RTC clock cycles (which is 64us with the default clock settings)
-    sleep_us(100);
-
-    retval = cyw43_arch_init();
-    if (retval) {
-        error_printf(true, "WiFi init failed");
-        return retval;
-    }
-    cyw43_arch_enable_sta_mode();
-
+    // SPI 0 Pins for SD Card and Display
+    gpio_set_function(SPI_DISP_SDC_SCK, GPIO_FUNC_SPI);
+    gpio_set_function(SPI_DISP_SDC_MOSI, GPIO_FUNC_SPI);
+    gpio_set_function(SPI_DISP_SDC_MISO, GPIO_FUNC_SPI);
     // Chip selects for the SPI paripherals
-    gpio_set_function(SPI_SDCARD_CS,   GPIO_FUNC_SIO);
-    // Chip selects are active-low, so we'll initialize them to a driven-high state
-    gpio_set_dir(SPI_SDCARD_CS, GPIO_OUT);
-    // Signal drive strengths
-    gpio_set_drive_strength(SPI_SDCARD_SCK, GPIO_DRIVE_STRENGTH_2MA);   // Single device connected
-    gpio_set_drive_strength(SPI_SDCARD_MOSI, GPIO_DRIVE_STRENGTH_2MA);  // Single device connected
-    gpio_set_drive_strength(SPI_SDCARD_CS, GPIO_DRIVE_STRENGTH_2MA);    // CS goes to a single device
-    // Initial output state
-    gpio_put(SPI_SDCARD_CS, SPI_CS_DISABLE);
-    // SPI 1 initialization for the SD card. Use SPI at 2.2MHz.
-    spi_init(SPI_SDCARD_DEVICE, 2200 * 1000);
-    gpio_set_function(SPI_SDCARD_SCK, GPIO_FUNC_SPI);
-    gpio_set_function(SPI_SDCARD_MOSI, GPIO_FUNC_SPI);
-    gpio_set_function(SPI_SDCARD_MISO, GPIO_FUNC_SPI);
+    gpio_set_function(SPI_DISP_CS, GPIO_FUNC_SIO);
+    gpio_set_dir(SPI_DISP_CS, GPIO_OUT);
+    gpio_set_function(SPI_SDC_CS, GPIO_FUNC_SIO);
+    gpio_set_dir(SPI_SDC_CS, GPIO_OUT);
+    // Display Control/Data
+    gpio_set_function(SPI_DISP_CD, GPIO_FUNC_SIO);
+    gpio_set_dir(SPI_DISP_CD, GPIO_OUT);
 
-    // I2C Initialisation.
-    i2c_init(PICO_DEFAULT_I2C, 400 * 1000);
-    // I2C is "open drain", pull ups to keep signal high when no data is being sent
-    gpio_set_function(PICO_DEFAULT_I2C_SDA_PIN, GPIO_FUNC_I2C);
-    gpio_set_function(PICO_DEFAULT_I2C_SCL_PIN, GPIO_FUNC_I2C);
-    gpio_pull_up(PICO_DEFAULT_I2C_SDA_PIN);
-    gpio_pull_up(PICO_DEFAULT_I2C_SCL_PIN);
+    // Signal drive strengths
+    gpio_set_drive_strength(SPI_DISP_SDC_SCK, GPIO_DRIVE_STRENGTH_2MA);   // Two devices connected
+    gpio_set_drive_strength(SPI_DISP_SDC_MOSI, GPIO_DRIVE_STRENGTH_2MA);  // Two devices connected
+    gpio_set_drive_strength(SPI_SDC_CS, GPIO_DRIVE_STRENGTH_2MA);    // CS goes to a single device
+
+    // Initial output state
+    gpio_put(SPI_DISP_CS, SPI_CS_DISABLE);
+    gpio_put(SPI_DISP_CD, 1);
+    gpio_put(SPI_SDC_CS, SPI_CS_DISABLE);
+
+    // SPI 0 initialization for the SD card. Use SPI at 2.2MHz.
+    spi_init(SPI_DISP_SDC_DEVICE, 2200 * 1000);
+
+    // I2C NOT USED.
 
     // GPIO Outputs (other than chip-selects)
     //    Tone drive
@@ -189,15 +178,15 @@ int board_init() {
 
     // GPIO Inputs
     //    IR Detectors
-    gpio_init(IR_A);
-    gpio_set_dir(IR_A, GPIO_IN);
-    gpio_init(IR_B);
-    gpio_set_dir(IR_B, GPIO_IN);
-    //    User Input Switch
-    gpio_init(USER_INPUT_SW);
-    gpio_set_dir(USER_INPUT_SW, GPIO_IN);
-    gpio_pull_up(USER_INPUT_SW);
-
+    //          These might be used for Switch Banks. They will be changed
+    //          in `curswitch.module_init` if so.
+    gpio_init(IR_A_GPIO);
+    gpio_pull_up(IR_A_GPIO);
+    gpio_set_dir(IR_A_GPIO, GPIO_IN);
+    gpio_init(IR_B_GPIO);
+    gpio_pull_up(IR_B_GPIO);
+    gpio_set_dir(IR_B_GPIO, GPIO_IN);
+    //    User Input Switch is shared with IR-B (works whether IR or Switch Banks)
 
     // Check the user input switch to see if it's pressed during startup.
     //  If yes, set 'debug_mode_enabled'
@@ -205,56 +194,104 @@ int board_init() {
         debug_mode_enable(true);
     }
 
+    // Initialize the display
+    disp_module_init();
+
+    disp_string(1, 3, "Silky", false, true);
+    disp_string(2, 3, "Design", false, true);
+
+    // Initialize the terminal library
+    disp_string(4, 0, "Init: Term", false, true);
+    term_module_init();
+
+    // Initialize the board RTC. It will be set correctly later when we
+    // have WiFi and can make a NTP call.
+    // Start on Sunday the 1st of January 2023 00:00:01
+    datetime_t t = {
+            .year = 2023,
+            .month = 01,
+            .day = 01,
+            .dotw = 0, // 0 is Sunday
+            .hour = 00,
+            .min = 00,
+            .sec = 01
+    };
+    disp_row_clear(4, false);
+    disp_string(4, 0, "Init: RTC", false, true);
+    rtc_init();
+    rtc_set_datetime(&t);
+    // clk_sys is >2000x faster than clk_rtc, so datetime is not updated immediately when rtc_set_datetime() is called.
+    // tbe delay is up to 3 RTC clock cycles (which is 64us with the default clock settings)
+    sleep_us(100);
+
+    disp_row_clear(4, false);
+    #ifdef BOARD_IS_PICOW
+        disp_string(4, 0, "Init: WiFi", false, true);
+        cyw43_arch_enable_sta_mode();
+    #else
+        disp_string(4, 0, "Pico: No WiFi", false, true);
+    #endif // BOARD_IS_PICOW
+
+    disp_row_clear(4, false);
+    disp_string(4, 0, "Init: ADC", false, true);
     // Initialize hardware AD converter, enable onboard temperature sensor and
     //  select its channel.
     adc_init();
     adc_set_temp_sensor_enabled(true);
     adc_select_input(4); // Inputs 0-3 are GPIO pins, 4 is the built-in temp sensor
 
-    // Get the configuration
+    // Get the configuration from the SD card
+    disp_row_clear(4, false);
+    disp_string(4, 0, "Init: Config", false, true);
     config_module_init();
     const config_sys_t* system_cfg = config_sys();
 
-    if (system_cfg->is_set) {
-        // Make an NTP call to get the actual time and set the RTC correctly
+    if (WiFiAvailable && system_cfg->is_set) {
+        // If this is a Pico-W try to connect to WiFi and then make an
+        // NTP call to get the actual time and set the RTC correctly
         // This also initializes the network subsystem
+        disp_row_clear(4, false);
+        disp_string(4, 0, "WiFi Connect", false, true);
         wifi_set_creds(system_cfg->wifi_ssid, system_cfg->wifi_password);
         network_update_rtc(system_cfg->tz_offset);
         // Give it time to make a NTP call
         sleep_ms(1000); // Ok to `sleep` as msg system not started
+        // Now read the RTC and print it
+        char datetime_buf[256];
+        rtc_get_datetime(&t);
+        strdatetime(datetime_buf, sizeof(datetime_buf), &t, SDTC_LONG_TXT_ON | SDTC_TIME_24HOUR);
+        printf("RTC set from NTP call - it is %s\n", datetime_buf);
+        strdatetime(datetime_buf, sizeof(datetime_buf), &t, SDTC_DATE_2DIGITS);
+        disp_row_clear(4, false);
+        disp_string(4, 0, datetime_buf, false, true);
     }
-    // Now read the RTC and print it
-    char datetime_buf[256];
-    rtc_get_datetime(&t);
-    strdatetime(datetime_buf, sizeof(datetime_buf), &t, SDTC_LONG_TXT_ON | SDTC_TIME_24HOUR);
-    printf("RTC set from NTP call - it is %s\n", datetime_buf);
 
-    // Initialize the display
-    disp_module_init();
+    // Initialize the Cursor Switches module based on the system config.
+    curswitch_module_init(!system_cfg->ir1_is_rc, !system_cfg->ir2_is_rc);
 
     // Initialize the multicore subsystem
     multicore_module_init();
 
     puts("\033[32mScores says hello!\033[0m");
 
-    return(true);
+    return(retval);
 }
 
 void boot_to_bootsel() {
     reset_usb_boot(0, 0);
 }
 
-static void _tone_sound_pattern_cont(void *user_data) {
+static void _tone_sound_duration_cont(void *user_data) {
     tone_on(false);
 }
-void tone_sound_pattern(int ms) {
+void tone_sound_duration(int ms) {
     tone_on(true);
     if (!cmt_message_loop_0_running()) {
         sleep_ms(ms);
-        _tone_sound_pattern_cont(NULL);
+        _tone_sound_duration_cont(NULL);
     }
     else {
-        cmt_sleep_ms(ms, _tone_sound_pattern_cont, NULL);
+        cmt_sleep_ms(ms, _tone_sound_duration_cont, NULL);
     }
 }
 
@@ -268,7 +305,7 @@ void _tone_on_off_cont(void* data) {
 }
 void tone_on_off(const int32_t *pattern) {
     while (*pattern) {
-        tone_sound_pattern(*pattern++);
+        tone_sound_duration(*pattern++);
         int off_time = *pattern++;
         if (off_time == 0) {
             return;
@@ -297,7 +334,11 @@ void led_flash(int ms) {
 }
 
 void led_on(bool on) {
+#ifdef BOARD_IS_PICO
+    gpio_put(PICO_DEFAULT_LED_PIN, on);
+#else
     cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, on);
+#endif
 }
 
 void _led_on_off_cont(void* user_data) {
@@ -335,6 +376,7 @@ float onboard_temp_c() {
     /* 12-bit conversion, assume max value == ADC_VREF == 3.3 V */
     const float conversionFactor = 3.3f / (1 << 12);
 
+    adc_select_input(4); // Inputs 0-3 are GPIO pins, 4 is the built-in temp sensor
     float adc = (float)adc_read() * conversionFactor;
     float tempC = 27.0f - (adc - 0.706f) / 0.001721f;
 

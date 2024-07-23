@@ -16,50 +16,44 @@ extern "C" {
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "curswitch/curswitch_t.h"
 #include "gfx/gfx.h"
 
 #include "pico/types.h"
+
+#define SCHEDULED_MESSAGES_MAX 16
 
 typedef enum _MSG_ID_ {
     // Common messages (used by both BE and UI)
     MSG_COMMON_NOOP = 0x0000,
     MSG_CONFIG_CHANGED,
     MSG_DEBUG_CHANGED,
+    MSG_INPUT_SW_PRESS,
+    MSG_INPUT_SW_RELEASE,
+    MSG_PANEL_BLINK_FAST_TGL,
+    MSG_PANEL_BLINK_SLOW_TGL,
+    MSG_PANEL_REPEAT_21MS,
+    MSG_SWITCH_ACTION,
+    MSG_SWITCH_LONGPRESS,
     //
     // Back-End messages
     MSG_BACKEND_NOOP = 0x0100,
     MSG_BE_TEST,
     MSG_CMT_SLEEP,
-    MSG_KEY_READ,
-    MSG_KOB_SOUND_CODE_CONT,
-    MSG_MKS_KEEP_ALIVE_SEND,
-    MSG_MKS_PACKET_RECEIVED,
-    MSG_MORSE_DECODE_FLUSH,
-    MSG_MORSE_CODE_SEQUENCE,
-    MSG_SEND_BE_STATUS,
+    MSG_INPUT_SW_DEBOUNCE,
+    MSG_STDIO_CHAR_READY,
+    MSG_B1SW_LONGPRESS_DELAY,
+    MSG_B2SW_LONGPRESS_DELAY,
     MSG_UI_INITIALIZED,
-    MSG_WIRE_CONNECT,
-    MSG_WIRE_CONNECT_TOGGLE,
-    MSG_WIRE_DISCONNECT,
-    MSG_WIRE_SET,
     //
     // Front-End/UI messages
     MSG_UI_NOOP = 0x0200,
     MSG_BE_INITIALIZED,
-    MSG_CMD_KEY_PRESSED,
     MSG_CMD_INIT_TERMINAL,
-    MSG_INPUT_CHAR_READY,
-    MSG_CODE_TEXT,
     MSG_DISPLAY_MESSAGE,
-    MSG_KOB_STATUS,
-    MSG_TOUCH_PANEL,
-    MSG_UPDATE_UI_STATUS,
+    MSG_PANEL_TOD_UPDATE,
+    MSG_SHELL_START,
     MSG_WIFI_CONN_STATUS_UPDATE,
-    MSG_WIRE_CHANGED,
-    MSG_WIRE_CONNECTED_STATE,
-    MSG_WIRE_CURRENT_SENDER,
-    MSG_WIRE_STATION_ID_RCVD,
-    MSG_WIRE_STATIONS_CLEARED,
 } msg_id_t;
 
 /**
@@ -71,7 +65,7 @@ typedef void (*cmt_sleep_fn)(void* user_data);
 typedef struct _cmt_sleep_data_ {
     cmt_sleep_fn sleep_fn;
     void* user_data;
-} _cmt_sleep_data_t;
+} cmt_sleep_data_t;
 
 /**
  * @brief Message data.
@@ -80,15 +74,14 @@ typedef struct _cmt_sleep_data_ {
  */
 typedef union _MSG_DATA_VALUE {
     char c;
+    bool bv;
     bool debug;
     uint32_t ts_ms;
     uint64_t ts_us;
-    _cmt_sleep_data_t* cmt_sleep;
-    const char* station_id;
+    cmt_sleep_data_t cmt_sleep;
     char* str;
     int32_t status;
-    gfx_point* touch_point;
-    unsigned short wire;
+    switch_action_data_t sw_action;
 } msg_data_value_t;
 
 /**
@@ -141,7 +134,7 @@ typedef struct _MSG_HANDLER_ENTRY {
 
 typedef struct _PROC_STATUS_ACCUM_ {
     volatile int64_t cs;
-    volatile uint32_t ts_psa;                               // Timestamp of last PS Accumulator/sec update
+    volatile uint32_t ts_psa;                       // Timestamp of last PS Accumulator/sec update
     volatile uint32_t t_active;
     volatile uint32_t t_idle;
     volatile uint32_t t_msgr;
@@ -207,6 +200,16 @@ extern void cmt_proc_status_sec(proc_status_accum_t* psas, uint8_t corenum);
 extern int cmt_sched_msg_waiting();
 
 /**
+ * @brief Get the ID's of the scheduled messages waiting.
+ *
+ * @param max The maximum number of ID's to return
+ * @param buf Buffer (of uint16's) to hold the values
+ *
+ * @return True is any messages are waiting
+ */
+extern bool cmt_sched_msg_waiting_ids(int max, uint16_t *buf);
+
+/**
  * @brief Sleep for milliseconds and call a function.
  * @ingroup cmt
  *
@@ -217,26 +220,48 @@ extern int cmt_sched_msg_waiting();
 extern void cmt_sleep_ms(int32_t ms, cmt_sleep_fn sleep_fn, void* user_data);
 
 /**
+ * @brief Schedule a message to post to Core-0 in the future.
+ *
+ * Use this when it is needed to future post to a core other than the one currently
+ * being run on.
+ *
+ * @param ms The time in milliseconds from now.
+ * @param msg The cmt_msg_t message to post when the time period elapses.
+ */
+extern void schedule_core0_msg_in_ms(int32_t ms, const cmt_msg_t* msg);
+
+/**
+ * @brief Schedule a message to post to Core-1 in the future.
+ *
+ * Use this when it is needed to future post to a core other than the one currently
+ * being run on.
+ *
+ * @param ms The time in milliseconds from now.
+ * @param msg The cmt_msg_t message to post when the time period elapses.
+ */
+extern void schedule_core1_msg_in_ms(int32_t ms, const cmt_msg_t* msg);
+
+/**
  * @brief Schedule a message to post in the future.
  *
  * @param ms The time in milliseconds from now.
  * @param msg The cmt_msg_t message to post when the time period elapses.
  */
-extern void schedule_msg_in_ms(int32_t ms, cmt_msg_t* msg);
+extern void schedule_msg_in_ms(int32_t ms, const cmt_msg_t* msg);
 
 /**
  * @brief Cancel scheduled message(s) for a message ID.
  * @ingroup cmt
  *
  * This will attempt to cancel the scheduled message. It is possible that the time might have already
- * past and the message was posted.
+ * passed and the message was posted.
  *
  * @param sched_msg_id The ID of the message that was scheduled.
  */
 extern void scheduled_msg_cancel(msg_id_t sched_msg_id);
 
 /**
- * @brief Get the ID of a scheduled message if one exists.
+ * @brief Indicate if a scheduled message exists.
  * @ingroup cmt
  *
  * Typically, this is used to keep from adding a scheduled message if one already exists.

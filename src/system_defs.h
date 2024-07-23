@@ -4,12 +4,25 @@
 extern "C" {
 #endif
 
+#include "pico/stdlib.h"
+
 #define scores_VERSION_INFO "Scores v0.1"  // ZZZ get from a central name/version string
+
+/**
+ * @brief Flag indicating that the board is a Pico-W
+ */
+#ifdef PICO_DEFAULT_LED_PIN
+    #define BOARD_IS_PICO
+#else
+    #define BOARD_IS_PICOW
+#endif
+
 
 #undef putc     // Undefine so the standard macros will not be used
 #undef putchar  // Undefine so the standard macros will not be used
 
 #include "hardware/exception.h"
+#include "hardware/pio.h"
 #include "pico/multicore.h"
 #include "pico/stdlib.h"
 
@@ -26,27 +39,36 @@ extern "C" {
 // Note: 'Pins' are the GPIO number, not the physical pins on the device.
 //
 
-// Using SPI 1 for the SD Card
-#define SPI_SDCARD_DEVICE   spi1    // Hardware SPI to use
-#define SPI_SDCARD_MOSI     11      // DP-15
-#define SPI_SDCARD_MISO     12      // DP-16
-#define SPI_SDCARD_SCK      10      // DP-14
-#define SPI_SDCARD_CS       26      // DP-31
+// Using SPI 0 for the SD Card and Display
+#define SPI_DISP_SDC_DEVICE spi0    // Hardware SPI to use
+#define SPI_DISP_SDC_SCK     2      // DP-4
+#define SPI_DISP_SDC_MOSI    3      // DP-5
+#define SPI_DISP_SDC_MISO    4      // DP-6
+#define SPI_DISP_CS          6      // DP-9
+#define SPI_DISP_CD          7      // DP-10
+#define SPI_SDC_CS           5      // DP-7
 
 // Chip select values/levels
 #define SPI_CS_ENABLE        0      // LOW
 #define SPI_CS_DISABLE       1      // HIGH
 
+// PIO Blocks
+#define PIO_PANEL_DRIVE_BLOCK   pio0    // PIO Block 0 is used to drive the panel
+#define PIO_PANEL_DRIVE_SM      0       // State Machine 0 is used for the panel
+#define PIO_IR_FRONT_BLOCK      pio1    // PIO Block 1 is used to read the front IR
+#define PIO_IR_FRONT_SM         0       // State Machine 0 is used to read the front IR
+#define PIO_IR_REAR_BLOCK       pio1    // PIO Block 2 is used to read the back IR
+#define PIO_IR_REAR_SM          1       // State Machine 1 is used to read the rear IR
+
 // Segment Enable
-#define PANEL_DIGIT_SEG_A_GPIO    13      // DP-17
-#define PANEL_DIGIT_SEG_B_GPIO    12      // DP-16
-#define PANEL_DIGIT_SEG_C_GPIO    11      // DP-15
-#define PANEL_DIGIT_SEG_D_GPIO    10      // DP-14
-#define PANEL_DIGIT_SEG_E_GPIO     9      // DP-12
-#define PANEL_DIGIT_SEG_F_GPIO     8      // DP-11
-#define PANEL_DIGIT_SEG_G_GPIO     7      // DP-10
-#define PANEL_DIGIT_SEG_P_GPIO     6      // DP-9 (Decimal Point)
-#define PANEL_DIGIT_SEG_GPIO_SHIFT 6    // GPIO shift to write all segments at once
+#define PANEL_DIGIT_SEG_A_GPIO    15      // DP-20
+#define PANEL_DIGIT_SEG_B_GPIO    14      // DP-19
+#define PANEL_DIGIT_SEG_C_GPIO    13      // DP-17
+#define PANEL_DIGIT_SEG_D_GPIO    12      // DP-16
+#define PANEL_DIGIT_SEG_E_GPIO    11      // DP-15
+#define PANEL_DIGIT_SEG_F_GPIO    10      // DP-14
+#define PANEL_DIGIT_SEG_G_GPIO     9      // DP-12
+#define PANEL_DIGIT_SEG_P_GPIO     8      // DP-11 (Decimal Point)
 
 // Indicator Enable (simply renamed segment enables)
 #define PANEL_IND_TEAM_A_1        PANEL_DIGIT_SEG_A
@@ -69,28 +91,31 @@ extern "C" {
 //  Indicator (4 Leds under Team A, 4 Leds under Team B)
 #define PANEL_DIGIT_A10_GPIO    16      // DP-21
 #define PANEL_DIGIT_A01_GPIO    17      // DP-22
-#define PANEL_DIGIT_B10_GPIO    18      // DP-21
-#define PANEL_DIGIT_B01_GPIO    19      // DP-21
-#define PANEL_DIGIT_C10_GPIO    20      // DP-21
-#define PANEL_DIGIT_C01_GPIO    21      // DP-21
-#define PANEL_DIGIT_IND_GPIO    22      // DP-21
-#define PANEL_DIGIT_GPIO_SHIFT  16     // GPIO shift to write all enables at once
+#define PANEL_DIGIT_B10_GPIO    18      // DP-24
+#define PANEL_DIGIT_B01_GPIO    19      // DP-25
+#define PANEL_DIGIT_C10_GPIO    20      // DP-26
+#define PANEL_DIGIT_C01_GPIO    21      // DP-27
+#define PANEL_DIGIT_IND_GPIO    22      // DP-29
 
 #define PANEL_DIGIT_OFF          0
 #define PANEL_DIGIT_ON           1
 
-#define PANEL_PWM_SLICE          0
-#define PANEL_DIGIT_SEGMENT_GPIO_MASK 0x007F3FC0 // 00000000 01111111 00111111 11000000
+#define PANEL_PIO_GPIO_BASE     PANEL_DIGIT_SEG_P_GPIO
+#define PANEL_PIO_GPIO_COUNT   15
 
 // Other GPIO
-#define IR_A                    14      // DP-19
-#define IR_B                    15      // DP-20
-#define TONE_DRIVE              27      // DP-32 - Buzzer drive
-#define USER_INPUT_SW           28      // DP-34 - IRQ on same pin.
+#define IR_A_GPIO               27          // DP-32
+#define IR_B_GPIO               28          // DP-33
+#define TONE_DRIVE              26          // DP-31 - Buzzer drive
+#define USER_INPUT_SW           IR_B_GPIO   // DP-33 - Shared with IR-B.
+#define SW_BANK1_GPIO           27          // Boards are set up to use IR or Switch Banks
+#define SW_BANK1_ADC            1           // Switch banks are read using the ADC
+#define SW_BANK2_GPIO           28          // Boards are set up to use IR or Switch Banks
+#define SW_BANK2_ADC            2           // Switch banks are read using the ADC
 
-#define IRQ_USER_INPUT_SW       USER_INPUT_SW
-#define IRQ_IR_A                IR_A
-#define IRQ_IR_B                IR_B
+#define IRQ_IR_A                IR_A_GPIO
+#define IRQ_IR_B                IR_B_GPIO
+#define IRQ_INPUT_SW            IR_B_GPIO    // DP-33 - Shared with IR-B
 
 // User Input Switch support
 #define USER_SW_OPEN             1      // Switch is connected to GND

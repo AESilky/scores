@@ -45,16 +45,16 @@ void spi_dma_isr();
 // Note: multiple SD cards can be driven by one SPI if they use different slave selects.
 static spi_t spis[] = {  // One for each SPI.
     {
-        .hw_inst = SPI_SDCARD_DEVICE,      // SPI component
-        .miso_gpio = SPI_SDCARD_MISO,      // GPIO number (not pin number)
-        .mosi_gpio = SPI_SDCARD_MOSI,
-        .sck_gpio = SPI_SDCARD_SCK,
+        .hw_inst = SPI_DISP_SDC_DEVICE,      // SPI component
+        .miso_gpio = SPI_DISP_SDC_MISO,      // GPIO number (not pin number)
+        .mosi_gpio = SPI_DISP_SDC_MOSI,
+        .sck_gpio = SPI_DISP_SDC_SCK,
         .set_drive_strength = true,
         .mosi_gpio_drive_strength = GPIO_DRIVE_STRENGTH_2MA,
         .sck_gpio_drive_strength = GPIO_DRIVE_STRENGTH_2MA,
 
         //.baud_rate = 1000 * 1000, // Very conservative. Probably fine given the small amount of data being used.
-        .baud_rate = 8000 * 1000,   // 8Mhz. The limitation here is SPI slew rate.
+        .baud_rate = 2200 * 1000,   // 2.2Mhz. The limitation here is SPI slew rate.
 
         .dma_isr = spi_dma_isr,
         .initialized = false,
@@ -66,7 +66,7 @@ static sd_card_t sd_cards[] = {  // One for each SD card
     {
         .pcName = "0:",                 // Name used to mount device
         .spi = &spis[0],                // Pointer to the SPI driving this card
-        .ss_gpio = SPI_SDCARD_CS,       // The SPI slave select GPIO for this SD card
+        .ss_gpio = SPI_SDC_CS,          // The SPI slave select GPIO for this SD card
         .set_drive_strength = false,    // Say 'false' because GPIO is setup at the system level
         .ss_gpio_drive_strength = GPIO_DRIVE_STRENGTH_2MA,
         // .card_detect_gpio = 22,
