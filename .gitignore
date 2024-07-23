@@ -83,3 +83,6 @@ Fp-info-cache
 *.private.c
 *.private.h
 *.private.cmake
+
+# System CORE files
+core*
