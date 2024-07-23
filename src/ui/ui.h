@@ -29,6 +29,11 @@ extern msg_loop_cntx_t ui_msg_loop_cntx;
 extern void start_ui(void);
 
 /**
+ * @brief True if the UI has been initialized.
+ */
+extern bool ui_initialized();
+
+/**
  * @brief Initialize the UI
  */
 extern void ui_module_init(void);

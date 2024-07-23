@@ -17,13 +17,16 @@ extern "C" {
 #include "config.h"
 
 /** Bit flags for the key system config items (these must exist to be valid)*/
-#define _SYSCFG_VER_ID 0x0001
-#define _SYSCFG_BCN_ID 0x0002
-#define _SYSCFG_TZ_ID  0x0004
-#define _SYSCFG_WP_ID  0x0008
-#define _SYSCFG_WS_ID  0x0010
-#define _SYSCFG_DWB_ID 0x0020
-#define _SYSCFG_NOT_LOADED 0x8000
+#define _SYSCFG_VER_ID      0x0001
+#define _SYSCFG_BCN_ID      0x0002
+#define _SYSCFG_TZ_ID       0x0004
+#define _SYSCFG_WP_ID       0x0008
+#define _SYSCFG_WS_ID       0x0010
+#define _SYSCFG_DWB_ID      0x0020
+#define _SYSCFG_IR1_RC      0x0040
+#define _SYSCFG_IR2_RC      0x0080
+#define _SYSCFG_PANEL_TYPE  0x0100
+#define _SYSCFG_NOT_LOADED  0x8000
 
 
 

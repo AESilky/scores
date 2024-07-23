@@ -97,7 +97,7 @@ extern float onboard_temp_f();
  *
  * @param ms Milliseconds to turn the buzzer on.
 */
-extern void tone_sound_pattern(int ms);
+extern void tone_sound_duration(int ms);
 
 /**
  * @brief Turn the buzzer on/off

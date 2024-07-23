@@ -5,11 +5,13 @@
  * SPDX-License-Identifier: MIT License
  *
  */
-#ifndef _KOB_CONFIG_H_
-#define _KOB_CONFIG_H_
+#ifndef _CONFIG_H_
+#define _CONFIG_H_
 #ifdef __cplusplus
  extern "C" {
 #endif
+
+#include "panel/panel.h"
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -18,23 +20,35 @@
 #define CONFIG_VERSION 1
 
 typedef struct _config_ {
+    /** Configuration Version */
     uint16_t cfg_version;
-    //
+    /** Configuration Name */
     char* name;
-    //
+    /** Long-Press time in milliseconds */
+    uint16_t long_press;
+    /** Sound is enabled */
     bool sound;
 } config_t;
 
 typedef struct _sys_config_ {
     bool is_set;
-    //
+    /** Configuration Version */
     uint16_t cfg_version;
-    //
+    /** Boot Configuration Number (for User config) */
     uint8_t boot_cfg_number;
+    /** Infrared input #1 is Remote Control / Else Joy-Switches */
+    bool ir1_is_rc;
+    /** Infrared input #2 is Remote Control / Else Joy-Switches */
+    bool ir2_is_rc;
+    /** Panel Type (NUMERIC|LINEAR) */
+    panel_type_t panel_type;
+    /** Time zone offset from GMT (signed float, like '-8.0') */
     float tz_offset;
+    /** Wifi Password */
     char* wifi_password;
+    /** Wifi SSID */
     char* wifi_ssid;
-    //
+    /** Number of characters to loop back for a space to wrap text (adjust for display size) */
     uint16_t disp_wrap_back;
 } config_sys_t;
 
@@ -184,10 +198,12 @@ extern bool config_sys_is_set();
 /**
  * @brief Initialize the configuration subsystem
  * @ingroup config
+ * 
+ * @return 0 if succesfull. The 'not initialized' bits on fail.
 */
-extern void config_module_init();
+extern int config_module_init();
 
 #ifdef __cplusplus
 }
 #endif
-#endif // _KOB_CONFIG_H_
+#endif // _CONFIG_H_
