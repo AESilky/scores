@@ -4,7 +4,6 @@ add_library(ui INTERFACE)
 target_sources(ui INTERFACE
     ui.c
     ui_disp.c
-    ui_remote_ctrl.c
     ui_term.c
 )
 

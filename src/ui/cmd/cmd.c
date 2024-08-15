@@ -147,9 +147,9 @@ static int _cmd_keys(int argc, char** argv, const char* unparsed) {
 }
 
 static void _cmd_ps_print(const proc_status_accum_t* ps, int corenum) {
-    int uaf = ONE_SECOND_MS - (ps->t_active + ps->t_idle + ps->t_msgr);
-    ui_term_printf("Core %d: Temp:%0.1f R:%hu I:%hu Pms:%u Ims:%u MRms:%u UAF:%d ItrS:0x%0.8x\n",
-        corenum, ps->core_temp, ps->retrived, ps->idle, ps->t_active, ps->t_idle, ps->t_msgr, uaf, ps->int_status);
+    int uaf = (ONE_SECOND_US - (ps->t_active + ps->t_idle + ps->t_msg_retrieve)) / 1000;
+    ui_term_printf("Core %d: Temp:%0.1f Retrieved:%u Idle:%u Active-us:%lu Idle-us:%lu Retrieve-us:%lu ?-ms:%d Intr:0x%0.8x\n",
+        corenum, ps->core_temp, ps->retrieved, ps->idle, ps->t_active, ps->t_idle, ps->t_msg_retrieve, uaf, ps->interrupt_status);
 }
 
 static int _cmd_proc_status(int argc, char** argv, const char* unparsed) {
@@ -160,13 +160,11 @@ static int _cmd_proc_status(int argc, char** argv, const char* unparsed) {
     }
     proc_status_accum_t ps0, ps1;
     int smwc;
-    bool showmsgs;
-    showmsgs = true;
+    bool showmsgs = false;
     if (argc > 1) {
         // They entered an option and/or command names
-        if (strcmp("-m", *argv) == 0 || strcmp("--msg", *argv) == 0) {
+        if (strcmp("-m", argv[1]) == 0 || strcmp("--msg", argv[1]) == 0) {
             showmsgs = true;
-            argv++; argc--;
         }
         else {
             // Not our argument.
@@ -181,20 +179,43 @@ static int _cmd_proc_status(int argc, char** argv, const char* unparsed) {
     _cmd_ps_print(&ps0, 0);
     _cmd_ps_print(&ps1, 1);
     ui_term_printf("Scheduled messages: %d\n", smwc);
-    if (showmsgs && smwc > 0) {
-        uint16_t msgs[SCHEDULED_MESSAGES_MAX];
-        cmt_sched_msg_waiting_ids(SCHEDULED_MESSAGES_MAX, msgs);
-        for (int i=0; i<SCHEDULED_MESSAGES_MAX; i++) {
-            int id = msgs[i];
-            if (id < 0) {
-                break; // Done
+    if (smwc > 0) {
+        if (showmsgs) {
+            uint16_t msgs[SCHEDULED_MESSAGES_MAX];
+            cmt_sched_msg_waiting_ids(SCHEDULED_MESSAGES_MAX, msgs);
+            for (int i=0; i<SCHEDULED_MESSAGES_MAX; i++) {
+                uint16_t id = msgs[i];
+                if ((int16_t)id < 0) {
+                    break;  // End of messages
+                }
+                ui_term_printf(" Scheduled Msg: %u [0x%03X]", id, id);
+                if (id >= MSG_BACKEND_NOOP && id < MSG_UI_NOOP) {
+                    ui_term_printf(" (BE+%u)\n", id - MSG_BACKEND_NOOP);
+                }
+                else if (id >= MSG_UI_NOOP) {
+                    ui_term_printf(" (UI+%u)\n", id - MSG_UI_NOOP);
+                }
+                else {
+                    ui_term_printf("\n");
+                }
             }
-            ui_term_printf("Msg: %d\n", id);
         }
     }
     else {
-        ui_term_printf(" No messages waiting.");
+        ui_term_printf(" No messages scheduled.\n");
     }
+    // Print the PC of the IR PIO state machines
+    uint8_t ir_a_sm_pc = pio_sm_get_pc(PIO_IR_BLOCK, PIO_IR_A_SM);
+    uint8_t ir_b_sm_pc = pio_sm_get_pc(PIO_IR_BLOCK, PIO_IR_B_SM);
+    uint8_t intr_state = 0;
+    for (int i=7; i>=0; i--) {
+        intr_state |= (pio_interrupt_get(PIO_IR_BLOCK, i) ? 1 : 0);
+        if (i > 0) {
+            intr_state <<= 1;
+        }
+    }
+    ui_term_printf("IR PIO: Intr:%0.2x - IR-A-PC:%d  IR-B-PC:%d\n", intr_state, ir_a_sm_pc, ir_b_sm_pc);
+
     return (0);
 }
 

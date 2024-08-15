@@ -10,7 +10,6 @@
 #include "system_defs.h"
 #include "ui.h"
 #include "ui_disp.h"
-#include "ui_remote_ctrl.h"
 #include "ui_term.h"
 
 #include "board.h"
@@ -21,7 +20,7 @@
 #include "config/config.h"
 #include "curswitch/curswitch.h"
 #include "rc/rc.h"
-#include "scorekeeper/scorekeeper.h"
+#include "scorekeeper/sk_app.h"
 #include "scorekeeper/sk_tod.h"
 #include "util/util.h"
 
@@ -42,17 +41,19 @@ static ui_app_id_t _app_active;
 static bool _initialized = false;
 
 // Internal, non message handler, function declarations
-void _app_scores_switch_action(switch_bank_t bank, switch_id_t sw_id, bool pressed, bool long_press, bool repeat);
-void _app_setup_switch_action(switch_bank_t bank, switch_id_t sw_id, bool pressed, bool long_press, bool repeat);
+void setup_app_switch_action(switch_bank_t bank, switch_id_t sw_id, bool pressed, bool long_press, bool repeat);
 void _ui_init_terminal_shell();
 
 // Message handler functions...
 static void _handle_be_initialized(cmt_msg_t* msg);
 static void _handle_config_changed(cmt_msg_t* msg);
-static void _handle_curswitch_action(cmt_msg_t* msg);
 static void _handle_init_terminal(cmt_msg_t* msg);
 static void _handle_input_switch_pressed(cmt_msg_t* msg);
 static void _handle_input_switch_released(cmt_msg_t* msg);
+static void _handle_rc_action(cmt_msg_t* msg);
+static void _handle_rc_longpress(cmt_msg_t* msg);
+static void _handle_rc_value_entered(cmt_msg_t* msg);
+static void _handle_switch_action(cmt_msg_t* msg);
 static void _handle_switch_longpress(cmt_msg_t* msg);
 
 static void _ui_idle_function_1();
@@ -64,7 +65,10 @@ static const msg_handler_entry_t _cmd_init_terminal_handler_entry = { MSG_CMD_IN
 static const msg_handler_entry_t _config_changed_handler_entry = { MSG_CONFIG_CHANGED, _handle_config_changed };
 static const msg_handler_entry_t _input_sw_pressed_handler_entry = { MSG_INPUT_SW_PRESS, _handle_input_switch_pressed };
 static const msg_handler_entry_t _input_sw_released_handler_entry = { MSG_INPUT_SW_RELEASE, _handle_input_switch_released };
-static const msg_handler_entry_t _curswitch_action_handler_entry = { MSG_SWITCH_ACTION, _handle_curswitch_action };
+static const msg_handler_entry_t _rc_action_handler_entry = { MSG_RC_ACTION, _handle_rc_action };
+static const msg_handler_entry_t _rc_longpress_handler_entry = { MSG_RC_LONGPRESS, _handle_rc_longpress };
+static const msg_handler_entry_t _rc_value_handler_entry = { MSG_RC_VALUE_ENTERED, _handle_rc_value_entered };
+static const msg_handler_entry_t _switch_action_handler_entry = { MSG_SWITCH_ACTION, _handle_switch_action };
 static const msg_handler_entry_t _switch_longpress_handler_entry = { MSG_SWITCH_LONGPRESS, _handle_switch_longpress };
 
 /**
@@ -75,9 +79,13 @@ static const msg_handler_entry_t _switch_longpress_handler_entry = { MSG_SWITCH_
  *
  */
 static const msg_handler_entry_t* _handler_entries[] = {
+    & cmt_sm_tick_handler_entry,
     &_sk_tod_update_handler_entry,
-    &_curswitch_action_handler_entry,
+    &_rc_action_handler_entry,
+    &_switch_action_handler_entry,
+    &_rc_longpress_handler_entry,
     &_switch_longpress_handler_entry,
+    &_rc_value_handler_entry,
     &_input_sw_pressed_handler_entry,
     &_input_sw_released_handler_entry,
     &_config_changed_handler_entry,
@@ -164,29 +172,112 @@ static void _handle_input_switch_released(cmt_msg_t* msg) {
 }
 
 /**
+ * @brief Message handler for MSG_RC_ACTION
+ * @ingroup ui
+ *
+ * The Remote Control processing determined that a key was pressed
+ *
+ * @param msg Contains a rc_action_data_t structure with information
+ *              about the action.
+ */
+static void _handle_rc_action(cmt_msg_t* msg) {
+    rc_vcode_t code = msg->data.rc_action.code;
+    bool repeat = msg->data.rc_action.repeat;
+    // Don't do anything if it is a repeat. We use the LONGPRESS message for that.
+    if (!repeat) {
+        info_printf(false, "Remote: %d\n", code);
+        switch (_app_active) {
+            case APP_SCORES:
+                sk_app_rc_action(msg->data.rc_action);
+                break;
+            case APP_SETUP:
+                // TODO: Setup app RC action
+                break;
+            case APP_NONE:
+                // No application active. Nothing to do.
+                break;
+        }
+    }
+}
+
+/**
+ * @brief Message handler for MSG_RC_LONGPRESS
+ * @ingroup ui
+ *
+ * A Remote Control button was long-pressed.
+ *
+ * @param msg Contains a rc_action_data_t structure with information
+ *              about the action.
+ */
+static void _handle_rc_longpress(cmt_msg_t* msg) {
+    rc_vcode_t code = msg->data.rc_action.code;
+    bool repeat = msg->data.rc_action.repeat;
+    const char* repeatstr = (repeat ? " repeat" : "");
+    info_printf(false, "Remote: %d Long Press%s\n", code, repeatstr);
+    switch (_app_active) {
+        case APP_SCORES:
+            sk_app_rc_action(msg->data.rc_action);
+            break;
+        case APP_SETUP:
+            // TODO: Setup app RC action
+            break;
+        case APP_NONE:
+            // No application active. Nothing to do.
+            break;
+    }
+}
+
+/**
+ * @brief Message handler for MSG_RC_VALUE_ENTERED
+ * @ingroup ui
+ *
+ * The Remote Control processing determined that a numeric was entered
+ *
+ * @param msg Contains a rc_entry_data_t structure with information
+ *              about the action.
+ */
+static void _handle_rc_value_entered(cmt_msg_t* msg) {
+    rc_vcode_t code = msg->data.rc_entry.code;
+    int value = msg->data.rc_entry.value;
+    int divisor = msg->data.rc_entry.divisor;
+    info_printf(false, "Remote value entered: %d  Divisor: %d  Terminator: %d\n", value, divisor, code);
+    switch (_app_active) {
+        case APP_SCORES:
+            sk_app_rc_entry(msg->data.rc_entry);
+            break;
+        case APP_SETUP:
+            // TODO: Setup app RC entry
+            break;
+        case APP_NONE:
+            // No application active. Nothing to do.
+            break;
+    }
+}
+
+/**
  * @brief Message handler for MSG_SWITCH_ACTION
  * @ingroup ui
- * 
+ *
  * The Cursor Switch processing determined that a switch was pushed
  * or released.
- * 
+ *
  * @param msg Contains a switch_action_data_t structure with information
  *              about the action.
  */
-static void _handle_curswitch_action(cmt_msg_t* msg) {
+static void _handle_switch_action(cmt_msg_t* msg) {
     switch_bank_t bank = msg->data.sw_action.bank;
     switch_id_t sw_id = msg->data.sw_action.switch_id;
     bool pressed = msg->data.sw_action.pressed;
     char* state;
     const char* swname = curswitch_shortname_for_swid(sw_id);
     state = (pressed ? "Pressed" : "Released");
-    debug_printf(false, "Bank%d %s %s\n", bank, swname, state);
+    info_printf(false, "Bank%d %s %s\n", bank, swname, state);
     switch (_app_active) {
         case APP_SCORES:
-            _app_scores_switch_action(bank, sw_id, pressed, false, false);
+            sk_app_switch_action(bank, sw_id, pressed, false, false);
             break;
         case APP_SETUP:
-            _app_setup_switch_action(bank, sw_id, pressed, false, false);
+            setup_app_switch_action(bank, sw_id, pressed, false, false);
             break;
         case APP_NONE:
             // No application active. Nothing to do.
@@ -197,9 +288,9 @@ static void _handle_curswitch_action(cmt_msg_t* msg) {
 /**
  * @brief Message handler for MSG_SWITCH_LONGPRESS
  * @ingroup ui
- * 
+ *
  * A Cursor Switch was long-pressed.
- * 
+ *
  * @param msg Contains a switch_action_data_t structure with information
  *              about the action.
  */
@@ -212,10 +303,10 @@ static void _handle_switch_longpress(cmt_msg_t* msg) {
     debug_printf(false, "Bank%d %s Long Press%s\n", bank, swname, repeatstr);
     switch (_app_active) {
         case APP_SCORES:
-            _app_scores_switch_action(bank, sw_id, true, true, repeat);
+            sk_app_switch_action(bank, sw_id, true, true, repeat);
             break;
         case APP_SETUP:
-            _app_setup_switch_action(bank, sw_id, true, true, repeat);
+            setup_app_switch_action(bank, sw_id, true, true, repeat);
             break;
         case APP_NONE:
             // No application active. Nothing to do.
@@ -227,65 +318,7 @@ static void _handle_switch_longpress(cmt_msg_t* msg) {
 // Internal functions
 // ============================================
 
-void _app_scores_switch_action(switch_bank_t bank, switch_id_t sw_id, bool pressed, bool long_press, bool repeat) {
-    if (!pressed) {
-        return;
-    }
-    // Handle the switches for keeping score
-    int sv;
-    // Bank1 is for the A score, Bank2 for B
-    sk_value_ctrl_t vctrl = (bank == SWBANK1 ? SKVALUE_A : SKVALUE_B);
-
-    // If this is a long_press of SW_ENTER, but not a repeat, set the score to 11
-    if (long_press && !repeat) {
-        int current_score = scorekeeper_get_value(vctrl);
-        if (current_score > 11) {
-            scorekeeper_set_value(vctrl, 11);
-        }
-        return;
-    }
-    // If this is a repeat long_press of SW_ENTER, set the score to 0
-    if (long_press && repeat) {
-        scorekeeper_set_value(vctrl, 0);
-        return;
-    }
-
-    // Get a value to change the score by based on the switch
-    switch (sw_id) {
-        case SW_LEFT:
-            // Increase score by 3
-            sv = 3;
-            break;
-        case SW_HOME:
-            // Increase score by 2
-            sv = 2;
-            break;
-        case SW_RIGHT:
-            // Increase score by 1
-            sv = 1;
-            break;
-        case SW_ENTER:
-            // Decreate score by 1
-            sv = -1;
-            break;
-        default:
-            // We don't expect the other switches to be installed
-            // but we'll handle added values
-            if (sw_id == SW_UP) {
-                sv = 5;
-            }
-            else if (sw_id == SW_DOWN) {
-                sv = -5;
-            }
-            else {
-                sv = 0;
-            }
-            break;
-    }
-    scorekeeper_add_value(vctrl, sv);
-}
-
-void _app_setup_switch_action(switch_bank_t bank, switch_id_t sw_id, bool pressed, bool long_press, bool repeat) {
+void setup_app_switch_action(switch_bank_t bank, switch_id_t sw_id, bool pressed, bool long_press, bool repeat) {
 
 }
 
@@ -350,7 +383,7 @@ void start_ui(void) {
     // Make sure we aren't already started and that we are being called from core-0.
     assert(!_started && 0 == get_core_num());
     _started = true;
-    
+
     start_core1(); // The Core-1 main starts the UI
 }
 
@@ -366,9 +399,7 @@ void ui_module_init() {
     ui_disp_build();
     _ui_init_terminal_shell();
     // Initialize the score keeper
-    scorekeeper_module_init();
-    // Register the Remote Control handlers
-    ui_rc_register_handlers();
+    sk_app_module_init();
     // Start out in the Scorekeeper functionality (switches to Setup at times)
     _app_active = APP_SCORES;
 

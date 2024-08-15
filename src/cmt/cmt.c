@@ -46,6 +46,10 @@ static bool _msg_loop_1_running = false;
 static proc_status_accum_t _psa[2]; // One Proc Status Accumulator for each core
 static proc_status_accum_t _psa_sec[2]; // Proc Status Accumulator per second for each core
 
+void cmt_handle_sleep(cmt_msg_t* msg);
+
+const msg_handler_entry_t cmt_sm_tick_handler_entry = { MSG_CMT_SLEEP, cmt_handle_sleep };
+
 /**
  * @brief Repeating alarm callback handler.
  * Handles the repeating timer, adjusts the time left and posts a message to
@@ -117,26 +121,26 @@ void cmt_proc_status_sec(proc_status_accum_t* psas, uint8_t corenum) {
             psa.core_temp = psa_sec->core_temp;
             psa.idle = psa_sec->idle;
             cs = psa.idle;
-            psa.retrived = psa_sec->retrived;
-            cs += psa.retrived;
+            psa.retrieved = psa_sec->retrieved;
+            cs += psa.retrieved;
             psa.t_active = psa_sec->t_active;
             cs += psa.t_active;
             psa.t_idle = psa_sec->t_idle;
             cs += psa.t_idle;
-            psa.t_msgr = psa_sec->t_msgr;
-            cs += psa.t_msgr;
-            psa.int_status = psa_sec->int_status;
-            cs += psa.int_status;
+            psa.t_msg_retrieve = psa_sec->t_msg_retrieve;
+            cs += psa.t_msg_retrieve;
+            psa.interrupt_status = psa_sec->interrupt_status;
+            cs += psa.interrupt_status;
             psa.ts_psa = psa_sec->ts_psa;
 
         } while(psa.cs != cs);
         psas->core_temp = psa.core_temp;
         psas->idle = psa.idle;
-        psas->retrived = psa.retrived;
+        psas->retrieved = psa.retrieved;
         psas->t_active = psa.t_active;
         psas->t_idle = psa.t_idle;
-        psas->t_msgr = psa.t_msgr;
-        psas->int_status = psa.int_status;
+        psas->t_msg_retrieve = psa.t_msg_retrieve;
+        psas->interrupt_status = psa.interrupt_status;
         psas->ts_psa = psa.ts_psa;
         psas->cs = psa.cs;
     }
@@ -173,8 +177,8 @@ bool cmt_sched_msg_waiting_ids(int max, uint16_t *buf) {
             values_index++;
         }
         // If we are less than the 'max' put a '-1' in to indicate the end.
-        if (i < max) {
-            buf[i] = -1;
+        if (i+1 < max) {
+            buf[i+1] = -1;
         }
     }
     mutex_exit(&sm_mutex);
@@ -304,28 +308,28 @@ void message_loop(const msg_loop_cntx_t* loop_context) {
 
     // Enter into the endless loop reading and dispatching messages to the handlers...
     while (1) {
-        uint32_t t_start = now_ms();
+        uint64_t t_start = now_us();
         // Store and reset the process status accumulators once every second
-        if (t_start - psa->ts_psa >= ONE_SECOND_MS) {
+        if (t_start - psa->ts_psa >= ONE_SECOND_US) {
             int64_t cs = 0;
             psa_sec->cs = -1;
             psa_sec->idle = psa->idle;
             cs += psa_sec->idle;
             psa->idle = 0;
-            psa_sec->retrived = psa->retrived;
-            cs += psa_sec->retrived;
-            psa->retrived = 0;
+            psa_sec->retrieved = psa->retrieved;
+            cs += psa_sec->retrieved;
+            psa->retrieved = 0;
             psa_sec->t_active = psa->t_active;
             cs += psa_sec->t_active;
             psa->t_active = 0;
             psa_sec->t_idle = psa->t_idle;
             cs += psa_sec->t_idle;
             psa->t_idle = 0;
-            psa_sec->t_msgr = psa->t_msgr;
-            cs += psa_sec->t_msgr;
-            psa->t_msgr = 0;
-            psa_sec->int_status = nvic_hw->iser;
-            cs += psa_sec->int_status;
+            psa_sec->t_msg_retrieve = psa->t_msg_retrieve;
+            cs += psa_sec->t_msg_retrieve;
+            psa->t_msg_retrieve = 0;
+            psa_sec->interrupt_status = nvic_hw->iser;
+            cs += psa_sec->interrupt_status;
             psa_sec->core_temp = onboard_temp_c();
             psa_sec->ts_psa = t_start;
             psa->ts_psa = t_start;
@@ -333,9 +337,9 @@ void message_loop(const msg_loop_cntx_t* loop_context) {
         }
 
         if (get_msg_function(&msg)) {
-            uint32_t as = now_ms();
-            psa->t_msgr += as - t_start;
-            psa->retrived++;
+            uint64_t as = now_us();
+            psa->t_msg_retrieve += as - t_start;
+            psa->retrieved++;
             // Find the handler
             const msg_handler_entry_t** handler_entries = loop_context->handler_entries;
             while (*handler_entries) {
@@ -345,13 +349,13 @@ void message_loop(const msg_loop_cntx_t* loop_context) {
                 }
             }
             // No more handlers found for this message.
-            uint32_t ht = now_ms() - as;
+            uint64_t ht = now_us() - as;
             psa->t_active += ht;
         }
         else {
             // No message available, allow next idle function to run
-            int32_t is = now_ms();
-            psa->t_msgr += is - t_start;
+            uint64_t is = now_us();
+            psa->t_msg_retrieve += is - t_start;
             psa->idle++;
             const idle_fn idle_function = *idle_functions;
             if (idle_function) {
@@ -362,7 +366,7 @@ void message_loop(const msg_loop_cntx_t* loop_context) {
                 // end of function list
                 idle_functions = loop_context->idle_functions; // reset the pointer
             }
-            uint32_t it = now_ms() - is;
+            uint64_t it = now_us() - is;
             psa->t_idle += it;
         }
     }

@@ -1,0 +1,133 @@
+.program nec_rx
+
+;
+; PIO for receiving RC-6 (Philips) Mode-0 IR Remote codes.
+;
+; Copyright 2023-24 AESilky
+; SPDX-License-Identifier: MIT License
+;
+; Decode IR frames in NEC format and push 32-bit words to the input FIFO.
+;
+; The clock is onfigured for 10 SM cycles per 'normal' 562.5us burst period (1t).
+; This allows easily detecting the Lead-in Mark and Space to then collect the data.
+;
+; The initailization function sets the correct divisor to achive this
+; relative to the system clock.
+;
+; Within the 'NEC' protocol frames consists of 32 bits sent least-siginificant bit first; so the
+; ISR is configured to shift right.
+;
+; The IR detector inverts the signal, so:
+; Mark = 0
+; Space = 1
+;
+; Data bits:
+; 0 = 1t Mark + 1t Space (2t)
+; 1 = 1t Mark + 3t Space (4t)
+;
+; A data frame consists of:
+; From Idle (Spacing)
+; 1. 9.0ms Mark (16t)
+; 2. 4.5ms Space (8t)
+; 3. Address - 8 data bits
+; 4. !Address - 8 data bits
+; 5. Command  - 8 data bits
+; 6. !Command - 8 data bits
+; 7. 1t Mark
+; Back to Idle (Spacing)
+;
+; Repeat Indicator
+; (appox 40ms after a full data frame)
+; 1. 9.0ms Mark (16t)
+; 2. 2.25ms Space (4t)
+; 3. 1t Mark
+;
+; For a repeat, we push 0x0001 as an indicator.
+;
+.origin 0
+.define DATA_PKT_LEN            32 - 1                  ; 4 Addr 4!Addr 4Data 4!Data (-1 for read before test)
+.define T_CYCLE                 10                      ; 1 't' is 10 SM Cycles
+.define LEADER_MARK_T_COUNT     10                      ; Count (w/margin) for a Leader Mark
+.define LEADER_DATA_THRESHOLD   (6 * (T_CYCLE/2))       ; Count of longer than the Leader Space for a repeat
+.define REPEAT_INDICATOR_FLAG   1                       ; Push 0x0001 as a flag indicating 'repeat'
+.define BIT_SAMPLE_DELAY        ((T_CYCLE + (T_CYCLE/2)) - 0)   ; Cycles to wait after end of burst before sampling
+
+.wrap_target
+wait_for_leader:
+    set y, (T_CYCLE/2)
+    set X, LEADER_MARK_T_COUNT
+public leader_wait_pc:
+    wait 0 pin 0                        ; wait for the next burst to start
+
+; Leader mark is 16t
+count_leader_mark:
+    jmp pin wait_for_leader             ; the burst ended before the counter expired
+    jmp y-- count_leader_mark           ; count 't' cycles
+    set y, (T_CYCLE/2)
+    jmp X-- count_leader_mark           ; wait for the burst to end
+    ; the counter expired - this is a leader mark
+    mov ISR, NULL                       ; reset the Input Shift Register
+    set x, LEADER_DATA_THRESHOLD
+    wait 1 pin 0                        ; wait for the leader space to start
+; Leader data space is 8t A repeat indicator space is 4t
+data_or_repeat:
+    jmp pin count_space
+    jmp repeat_indicated
+count_space:
+    jmp x-- data_or_repeat
+; leader space is longer than a repeat indicator
+    jmp data_pkt_coming
+
+; For a repeat, push a '1' (0x0001) as a flag
+repeat_indicated:
+    set x, REPEAT_INDICATOR_FLAG
+    in x 1
+    in NULL 31                          ; shift the bit down
+    jmp data_ready
+
+data_pkt_coming:
+    set y, DATA_PKT_LEN
+next_data_bit:
+    wait 0 pin 0
+    wait 1 pin 0 [ BIT_SAMPLE_DELAY ]   ; wait for 1.5t, then sample the bit value
+    in PINS, 1                          ; if next burst has started, it's '0' (short gap)
+                                        ; else '1' (long gap)
+    jmp y-- next_data_bit
+data_ready:
+    push
+.wrap
+
+
+% c-sdk {
+#define IR_REPEAT_INDICATOR_FLAG 1
+
+static inline void nec_rx_program_init (PIO pio, uint sm, uint offset, uint pin) {
+    // Set the GPIO function of the pin (connect the PIO to the pad)
+    pio_gpio_init(pio, pin);
+
+    // Set the pin direction to `input` at the PIO and a single pin
+    pio_sm_set_consecutive_pindirs(pio, sm, pin, 1, false);
+
+    // Create a new state machine configuration
+    pio_sm_config c = nec_rx_program_get_default_config (offset);
+
+    // configure the Input Shift Register
+    sm_config_set_in_shift(&c, true, false, 32); // Shift right, No Autopush, 32 bits
+
+    // join the FIFOs to make a single large receive FIFO
+    sm_config_set_fifo_join (&c, PIO_FIFO_JOIN_RX);
+
+    // Map the IN pin group to one pin
+    sm_config_set_in_pins(&c, pin);
+
+    // Map the JMP pin to the `pin` parameter of this function.
+    sm_config_set_jmp_pin(&c, pin);
+
+    // Set the clock divider to 10 ticks per 562.5us burst period
+    float div = clock_get_hz (clk_sys) / (10.0 / 562.5e-6);
+    sm_config_set_clkdiv(&c, div);
+
+    // Apply the configuration to the state machine
+    pio_sm_init(pio, sm, offset, &c);
+}
+%}

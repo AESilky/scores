@@ -1,7 +1,7 @@
 {
 	"folders": [
 		{
-			"path": ".."
+			"path": "."
 		}
 	],
 	"settings": {
@@ -19,7 +19,9 @@
 			"types.h": "c",
 			"assert.h": "c",
 			"features.h": "c",
-			"features-time64.h": "c"
-		}
+			"features-time64.h": "c",
+			"nec-rx.pio.h": "c"
+		},
+		"cortex-debug.variableUseNaturalFormat": false
 	}
 }
