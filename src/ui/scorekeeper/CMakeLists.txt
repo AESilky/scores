@@ -3,6 +3,7 @@ add_library(scorekeeper INTERFACE)
 
 target_sources(scorekeeper INTERFACE
     scorekeeper.c
+    sk_app.c
     sk_screen.c
     sk_tod.c
 )

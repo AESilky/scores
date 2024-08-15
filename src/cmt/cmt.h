@@ -18,6 +18,7 @@ extern "C" {
 
 #include "curswitch/curswitch_t.h"
 #include "gfx/gfx.h"
+#include "rc/rc_t.h"
 
 #include "pico/types.h"
 
@@ -27,9 +28,13 @@ typedef enum _MSG_ID_ {
     // Common messages (used by both BE and UI)
     MSG_COMMON_NOOP = 0x0000,
     MSG_CONFIG_CHANGED,
+    MSG_CMT_SLEEP,
     MSG_DEBUG_CHANGED,
     MSG_INPUT_SW_PRESS,
     MSG_INPUT_SW_RELEASE,
+    MSG_RC_ACTION,
+    MSG_RC_LONGPRESS,
+    MSG_RC_VALUE_ENTERED,
     MSG_PANEL_BLINK_FAST_TGL,
     MSG_PANEL_BLINK_SLOW_TGL,
     MSG_PANEL_REPEAT_21MS,
@@ -39,8 +44,8 @@ typedef enum _MSG_ID_ {
     // Back-End messages
     MSG_BACKEND_NOOP = 0x0100,
     MSG_BE_TEST,
-    MSG_CMT_SLEEP,
     MSG_INPUT_SW_DEBOUNCE,
+    MSG_IR_FRAME_RCVD,
     MSG_STDIO_CHAR_READY,
     MSG_B1SW_LONGPRESS_DELAY,
     MSG_B2SW_LONGPRESS_DELAY,
@@ -76,12 +81,15 @@ typedef union _MSG_DATA_VALUE {
     char c;
     bool bv;
     bool debug;
+    cmt_sleep_data_t cmt_sleep;
+    rc_ir_frame_t ir_frame;
+    rc_action_data_t rc_action;
+    rc_value_entry_t rc_entry;
+    int32_t status;
+    char* str;
+    switch_action_data_t sw_action;
     uint32_t ts_ms;
     uint64_t ts_us;
-    cmt_sleep_data_t cmt_sleep;
-    char* str;
-    int32_t status;
-    switch_action_data_t sw_action;
 } msg_data_value_t;
 
 /**
@@ -96,6 +104,14 @@ typedef struct _CMT_MSG {
     msg_data_value_t data;
     uint32_t t;
 } cmt_msg_t;
+
+/**
+ * @brief Handler Entry for the CMT Sleep. This is put in both message loop
+ *      handler lists, so a sleep can be handled for either.
+ * @ingroup cmt
+ *
+ */
+extern const msg_handler_entry_t cmt_sm_tick_handler_entry;
 
 
 #include "multicore.h"
@@ -134,13 +150,13 @@ typedef struct _MSG_HANDLER_ENTRY {
 
 typedef struct _PROC_STATUS_ACCUM_ {
     volatile int64_t cs;
-    volatile uint32_t ts_psa;                       // Timestamp of last PS Accumulator/sec update
-    volatile uint32_t t_active;
-    volatile uint32_t t_idle;
-    volatile uint32_t t_msgr;
-    volatile uint16_t retrived;
-    volatile uint16_t idle;
-    volatile uint32_t int_status;
+    volatile uint64_t ts_psa;                       // Timestamp of last PS Accumulator/sec update
+    volatile uint64_t t_active;
+    volatile uint64_t t_idle;
+    volatile uint64_t t_msg_retrieve;
+    volatile uint32_t retrieved;
+    volatile uint32_t idle;
+    volatile uint32_t interrupt_status;
     volatile float core_temp;
 } proc_status_accum_t;
 

@@ -53,12 +53,12 @@ extern "C" {
 #define SPI_CS_DISABLE       1      // HIGH
 
 // PIO Blocks
-#define PIO_PANEL_DRIVE_BLOCK   pio0    // PIO Block 0 is used to drive the panel
-#define PIO_PANEL_DRIVE_SM      0       // State Machine 0 is used for the panel
-#define PIO_IR_FRONT_BLOCK      pio1    // PIO Block 1 is used to read the front IR
-#define PIO_IR_FRONT_SM         0       // State Machine 0 is used to read the front IR
-#define PIO_IR_REAR_BLOCK       pio1    // PIO Block 2 is used to read the back IR
-#define PIO_IR_REAR_SM          1       // State Machine 1 is used to read the rear IR
+#define PIO_PANEL_DRIVE_BLOCK   pio0        // PIO Block 0 is used to drive the panel
+#define PIO_PANEL_DRIVE_SM      0           // State Machine 0 is used for the panel
+#define PIO_IR_BLOCK            pio1        // PIO Block 1 is used to read the IR ports
+#define PIO_IR_IRQ              PIO1_IRQ_0  // PIO IRQ to use for the IR
+#define PIO_IR_A_SM             0           // State Machine 0 is used to read the front IR (A)
+#define PIO_IR_B_SM             1           // State Machine 1 is used to read the rear IR (B)
 
 // Segment Enable
 #define PANEL_DIGIT_SEG_A_GPIO    15      // DP-20
@@ -113,8 +113,6 @@ extern "C" {
 #define SW_BANK2_GPIO           28          // Boards are set up to use IR or Switch Banks
 #define SW_BANK2_ADC            2           // Switch banks are read using the ADC
 
-#define IRQ_IR_A                IR_A_GPIO
-#define IRQ_IR_B                IR_B_GPIO
 #define IRQ_INPUT_SW            IR_B_GPIO    // DP-33 - Shared with IR-B
 
 // User Input Switch support
@@ -124,6 +122,10 @@ extern "C" {
 // Buzzer/Tone support
 #define TONE_OFF 0
 #define TONE_ON  1
+
+// User input controls
+#define SWITCH_LONGPRESS_DEFAULT 800 // 0.8 seconds (800ms) is considered a 'long press'
+#define SWITCH_REPEAT_MS 250 // If a switch is long-pressed, repeat it every 1/4 second.
 
 #ifdef __cplusplus
 }

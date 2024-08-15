@@ -20,40 +20,40 @@
 #include <string.h>
 
 /**
- * Calculated (Measured) Switch voltages:
+ * Calculated Switch voltages:
  *
- * UP = 2.72V ()
- * RT = 2.43V ()
- * LF = 1.98V ()
- * DN = 1.34V ()
- * HM = 0.60V ()
- * EN = 0.00V ()
+ * UP = 2.75V
+ * RT = 2.20V
+ * LF = 1.65V
+ * DN = 1.10V
+ * HM = 0.55V
+ * EN = 0.00V
  *
- * Voltages (calculated) High to Low
+ * Voltages High to Low
  * 3.30 = NONE
- *          - 0.58
- * 2.72 = UP
- *          - 0.29
- * 2.43 = RT
- *          - 0.45
- * 1.98 = LF
- *          - 0.64
- * 1.34 = DN
- *          - 0.74
- * 0.60 = HM
- *          - 0.60
+ *          - 0.55
+ * 2.75 = UP
+ *          - 0.55
+ * 2.20 = RT
+ *          - 0.55
+ * 1.65 = LF
+ *          - 0.55
+ * 1.10 = DN
+ *          - 0.55
+ * 0.55 = HM
+ *          - 0.55
  * 0.00 = EN
  */
 // 12-bit conversion, assume max value == ADC_VREF == 3.3 V
 #define CONVERSION_FACTOR (3.3f / (1 << 12))
-#define ALLOWABLE_DELTA 100  // Values +- 100 indicate the switch
+#define ALLOWABLE_DELTA 150  // Values +- 150 indicate the switch
 #define SW_NONE_VAL 3800 // This value is well below the max (4095), but well above SW_UP
 // The following are the values from the ADC for exact readings of the calculated voltages
-#define SW_UP_VAL 3376
-#define SW_RT_VAL 3016
-#define SW_LF_VAL 2458
-#define SW_DN_VAL 1663
-#define SW_HM_VAL  745
+#define SW_UP_VAL 3413
+#define SW_RT_VAL 2730
+#define SW_LF_VAL 2048
+#define SW_DN_VAL 1365
+#define SW_HM_VAL  683
 #define SW_EN_VAL    0
 
 typedef struct _sw_val_minmax_ {
@@ -168,7 +168,7 @@ static int _whats_pressed(uint sw_val) {
  * until we get SW_READ_REPEAT_COUNT consistant switch number readings.
  * Note that the readings are the 'switch number' not the specific
  * ADC value.
- * 
+ *
  * @param user_data Defined as a pointer, but directly contains the bank number.
  */
 void _read_bank_delayed(void* user_data) {
@@ -188,7 +188,7 @@ void _read_bank_delayed(void* user_data) {
         // We need to read again...
         if (--_sw_bank_read_failsafe[bank_index] <= 0) {
             // We couldn't get consistant read values. Print a warning and give up.
-            warn_printf(true, "Read switch Bank%d failed to get consistant values.", bank);
+            warn_printf(true, "Read switch Bank%d failed to get consistant values.\n", bank);
             _sw_bank_readinprogress[bank_index] = false;
             return;
         }

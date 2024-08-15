@@ -13,6 +13,8 @@
 #include "debug_support.h"
 //
 #include "be/be.h"
+#include "config/config.h"
+#include "rc/rc.h"
 #include "ui/ui.h"
 //
 #include "display/oled1106_spi/display_oled1106.h"
@@ -41,12 +43,14 @@ static const int32_t say_hi[] = {
 int main()
 {
     // useful information for picotool
-    bi_decl(bi_program_description("Control for AES Scoreboard"));
+    bi_decl(bi_program_description("OS and Control for AES Scoreboard"));
 
     // Board/base level initialization
     if (board_init() != 0) {
         panic("Board init failed.");
     }
+
+    const config_sys_t* system_cfg = config_sys();
 
     // Indicate that we are awake
     if (debug_mode_enabled()) {
@@ -57,7 +61,9 @@ int main()
     int si = sizeof(int);
     int sl = sizeof(long);
     debug_printf(true, "Size of char: %d  short: %d  int: %d  long: %d\n", sc, ss, si, sl);
-    
+    // Uncomment to force starting in Debug Mode
+    //debug_mode_enable(true);
+
     led_on_off(say_hi);
 
     sleep_ms(2000);
@@ -69,11 +75,19 @@ int main()
     // Launch the UI (core-1 Message Dispatching Loop)
     start_ui();
 
-    // Launch the Backend (core-0 (endless) Message Dispatching Loop - never returns)
+    // Enable the IR receivers
+    rc_enable_ir(system_cfg->ir1_is_rc, system_cfg->ir2_is_rc);
+
+    // Launch the Backend (core-0 (endless) Message Dispatching Loop
+    // (!!! THIS NEVER RETURNS !!!)
     start_be();
 
     // How did we get here?!
     error_printf(true, "scores - Somehow we are out of our endless message loop in `main()`!!!");
+    disp_clear(true);
+    disp_string(1, 0, "!!!!!!!!!!!!!!!!", false, true);
+    disp_string(2, 0, "! OS LOOP EXIT !", false, true);
+    disp_string(3, 0, "!!!!!!!!!!!!!!!!", false, true);
     // ZZZ Reboot!!!
     return 0;
 }

@@ -17,9 +17,6 @@ extern "C" {
 
 #define BE_CORE_NUM 0
 
-#define SWITCH_LONGPRESS_DEFAULT 800 // 0.8 seconds (800ms) is considered a 'long press'
-#define SWITCH_REPEAT_MS 250 // If a switch is long-pressed, repeat it every 1/4 second.
-
 /**
  * @brief Message loop context for use by the loop handler.
  * @ingroup backend

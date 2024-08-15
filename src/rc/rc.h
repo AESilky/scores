@@ -9,11 +9,13 @@
  *
  * SPDX-License-Identifier: MIT
  */
-#ifndef _CTRL_H_
-#define _CTRL_H_
+#ifndef _RCTRL_H_
+#define _RCTRL_H_
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include "rc.h"
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -21,55 +23,34 @@ extern "C" {
 
 #include "cmt/cmt.h"
 
-// //////////////// Virtual Remote Code to Logical (X15 Remote) ///////////////
-#define RC_TV_INPUT         1   //
-#define RC_POWER            2   //
-#define RC_MUTE             3   //
-#define RC_VOL_UP           4   //
-#define RC_VOL_DOWN         5   //
-#define RC_CH_UP            6   //
-#define RC_CH_DOWN          7   //
-#define RC_BACK             8   //
-#define RC_INFO             9   //
-#define RC_NUM_0           10  //
-#define RC_NUM_1           11   //
-#define RC_NUM_2           12   //
-#define RC_NUM_3           13   //
-#define RC_NUM_4           14   //
-#define RC_NUM_5           15   //
-#define RC_NUM_6           16   //
-#define RC_NUM_7           17   //
-#define RC_NUM_8           18   //
-#define RC_NUM_9           19   //
-#define RC_MOVE_BACK       20   // Row of 3a - 1
-#define RC_PLAY_PAUSE      21   // Row of 3a - 2
-#define RC_MOVE_FORWARD    22   // Row of 3a - 3
-#define RC_EXIT            23   // Row of 3b - 1
-#define RC_DOT             24   // Row of 3b - 2
-#define RC_PAGE_UP         25   // Row of 3b - 3
-#define RC_GUIDE           26   // Row of 3c - 1
-#define RC_LOGO            27   // Row of 3c - 2
-#define RC_PAGE_DOWN       28   // Row of 3c - 3
-#define RC_OK              29   // Cursor Pad - OK (center)
-#define RC_CURSOR_UP       30   // Cursor Pad - UP
-#define RC_CURSOR_RIGHT    31   // Cursor Pad - RIGHT
-#define RC_CURSOR_DOWN     32   // Cursor Pad - DOWN
-#define RC_CURSOR_LEFT     33   // Cursor Pad - LEFT
-#define RC_A               34   // Letter Buttons around Cursor Pad
-#define RC_B               35   // Letter Buttons around Cursor Pad
-#define RC_C               36   // Letter Buttons around Cursor Pad
-#define RC_D               37   // Letter Buttons around Cursor Pad
-#define RC_MIC             38   // Microphone/Talk
 
 /**
  * @brief The maximum code value.
+ * @ingroup rc
  */
 #define CTRL_CODE_MAX 63
 
 /**
  * @brief The number of Control Codes handled.
+ * @ingroup rc
  */
 #define CTRL_CODES_NUM 64
+
+/**
+ * @brief Message handler entry for IR frames received.
+ * @ingroup rc
+ *
+ * IR frames are the (nearly) raw information detected.
+ */
+extern const msg_handler_entry_t _os_ir_frame_handler_entry;
+
+/**
+ * @brief Message handler entry for Remote Control actions.
+ * @ingroup rc
+ *
+ * Remote Control (RC) actions are button presses.
+ */
+extern const msg_handler_entry_t _os_rc_action_handler_entry;
 
 /**
  * @brief Function prototype for the remote code handler.
@@ -80,31 +61,53 @@ extern "C" {
 typedef void (*remote_code_handler_fn)(uint8_t code, bool repeat);
 
 /**
+ * @brief Enable the IR PIO state machines and the IRQ.
+ * @ingroup rc
+ *
+ * The PIO state machines are configured in the module init, but the state machines and irq are not
+ * started/enabled, so that interrupts won't be generated until everything is ready for them. This
+ * starts the state machines for the enabled IR ports and if either is enabled it enables the interrupt.
+ */
+extern void rc_enable_ir(bool ir_a_enabled, bool ir_b_enabled);
+
+/**
  * @brief Handle a remote code.
+ * @ingroup rc
  *
  * @param code A remote code from -63 to 0 to 63. Negative values indicate 'repeat' of the (positive) code.
  */
 extern void rc_handle_code(int16_t code);
 
 /**
- * @brief Register a handler for a control code.
+ * @brief Indicate if a value is in the process of being collected.
+ * @ingroup rc
  *
- * @param code The code to register the handler for.
- * @param handler The handler function to be called for the code
- * @return remote_code_handler_fn The handler that was registered for the code (or null)
+ * @return true A value is being collected
+ * @return false Not collecting a value
  */
-extern remote_code_handler_fn rc_register_handler(uint8_t code, remote_code_handler_fn handler);
+extern bool rc_is_collecting_value();
+
+/**
+ * @brief Clear the collecting of a value. Set the collected value to 0.
+ * @ingroup rc
+ *
+ * After a value has been collected, this must be called in order to collect again.
+ */
+extern void rc_value_collecting_reset();
 
 /**
  * @brief Initialize the command processor.
- * @ingroup ui
+ * @ingroup rc
+ *
+ * @param ir_a_enabled True if the Front IR (A) should be enabled
+ * @param ir_b_enabled True if the Rear IR (B) should be enabled
  */
-extern void rc_module_init(void);
+extern void rc_module_init(bool ir_a_enabled, bool ir_b_enabled);
 
 
 #ifdef __cplusplus
     }
 #endif
-#endif // _CTRL_H_
+#endif // _RCTRL_H_
 
 
