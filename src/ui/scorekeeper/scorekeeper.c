@@ -1,5 +1,5 @@
 /**
- * Scorekeeper functionality.
+ * Scorekeeper base functionality.
  *
  *
  * Copyright 2023-24 AESilky

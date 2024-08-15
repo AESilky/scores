@@ -51,7 +51,7 @@
  * This module takes care of the physical display panel. The logic/decision
  * of what to put on the display is not in this module.
  *
- * Copyright 2023 AESilky
+ * Copyright 2023-24 AESilky
  * SPDX-License-Identifier: MIT License
  *
 */
@@ -389,9 +389,11 @@ void panel_module_init(panel_type_t panel_type) {
     _pio_panel = PIO_PANEL_DRIVE_BLOCK;
     _tran_count = DIGITS_CTRL_BUF_SIZE;
 
-    // Create the PIO program. This simply reads a word from the fifo and outputs 15 bits to the GPIO
-    // This is just a single `out pins, n`
-    // instruction with a wrap.
+    // Create the PIO program. This simply reads a word from the fifo and outputs 15 bits to the GPIO.
+    //
+    // This is just a single `out pins, n` instruction with a wrap.
+    // So it's easier to just generate the PIO code than to create a source file, build it,
+    // load it, etc.
     uint paneldrv_pio_prog = pio_encode_out(pio_pins, PANEL_PIO_GPIO_COUNT);
     struct pio_program paneldrv_prog = {
             .instructions = (const uint16_t *)&paneldrv_pio_prog,
@@ -422,7 +424,7 @@ void panel_module_init(panel_type_t panel_type) {
         uint16_t v = (de << 8) + segs; // Store the digit enable and segments
         _digits_ctrl_buf[i] = v;
     }
-    _digits_ctrl_buf[DIGITS_CTRL_BUF_SIZE - 1] = 0x0000; // Zero out the last word for the safe-fill
+    _digits_ctrl_buf[DIGITS_CTRL_BUF_SIZE - 1] = 0x0000; // Zero out the last word for the safety-fill
 
     _dma_channel_panel = dma_claim_unused_channel(true);
     _dma_channel_control = dma_claim_unused_channel(true);

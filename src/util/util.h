@@ -17,6 +17,7 @@ extern "C" {
 
 // Some general purpose time constants
 #define ONE_SECOND_MS 1000
+#define ONE_SECOND_US (1000*ONE_SECOND_MS)
 #define FIVE_SECONDS_MS 5000
 #define TEN_SECONDS_MS 10000
 #define FIFTEEN_SECONDS_MS 15000
