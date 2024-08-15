@@ -1,0 +1,100 @@
+;
+; PIO for receiving RC-6 (Philips) Mode-0 IR Remote codes.
+;
+; Copyright 2023-24 AESilky
+; SPDX-License-Identifier: MIT License
+;
+.program rc6_philips_rx
+.origin 0
+; =============================================================================
+; The protocol will be described using 't' times.
+; 1t = 440µs (technically 444µs)
+;
+; SM clock is set to t/20 (twenty times as fast as 't')
+; 1t is 20 cycles. One 'normal' bit is 2t (40 cycles). One 'Toggle' bit is 4t (80 cycles).
+;
+; The IR receiver presents a Space as HIGH(1) and a Mark as LOW(0).
+; 0 = 10 = Space [1t] + Mark [1t] (Space [2t] + Mark [2t])
+; 1 = 01 = Mark [1t] + Space [1t] (Mark [2t] + Space [2t])
+; ---
+; Leader  = Mark of 6t (2.640ms = 3 bits) and Space of 2t (0.880ms = 1 bit)
+; Mode    = 3 (normal) bits indicating the Mode. Mode-0 is Philips Consumer
+; Toggle  = 1 (toggle) bit [4t] (1.760ms). (Same width as 2 normal bits)
+;           0 = Space 2t + Mark 2t
+;           1 = Mark 2t + Space 2t
+; Address = 8 (normal) bits MSB-LSB. 8*2t=16t=7.040ms
+; Command = 8 (normal) bits MSB-LSB. 8*2t=16t=7.040ms
+; Idle    = Space minimum of 6t (2.640ms)
+;
+; For our use, the Mode is assumed to be 0, so we capture it, but we aren't concerned
+;   about its value.
+;
+; The Toggle bit is important, as it allows the code to tell the difference between a
+;   repeat (key held down) and individual key presses.
+;
+; The Mode plus the Toggle is the same as 5 normal bits (6t+4t=10t). So, if we read those
+;   and shift them into the ISR they can be read by the main code as byte 3 of 3.
+;   We will call that set of bits "Control".
+;
+; When we get to the Address and Data portion, we rely on the Manchester Encoding to
+;   sync our clock. However, due to IR receiver's inversion, the data bits are flipped.
+;
+; Graphically...  Showing MODE=0x0 TOGGLE=1  ADDR=0x00  DATA=0x05
+; T                             1  1  1  1  1  1  1  1  1  1  2  2  2  2  2  2
+; T= 1  2  3  4  5  6  7  8  9  0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5
+;    _________________                   _____    __    __    __       _____
+;                     |_________________|     |__|  |__|  |__|  |_____|     |_
+;      ---- IDLE ----> <------- LEADER ------> <----- MODE ----> <-- TGL --> <-- ADDR
+; S= 1  2  3  4  5  6  1  2  3  4  5  6  7  8  1  2  3  4  5  6  1  2  3  4  1
+; D=                                           [ 0     0     0 ] [    1    ] 
+;
+; T   2  2  2  2  2  3  3  3  3  3  3  3  3  3  3  4  4  4  4  4  4  4  4  4  4  5  5  5  5  5  5  5  5  5  5  6  6  6  6
+; T=  5  6  7  8  9  0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5  6  7  8  9  0  1  2  3
+;        __    __    __    __    __    __    __    __    __    __    __    __    __,__   ,   __,__    _________________...
+;     __|  |__|  |__|  |__|  |__|  |__|  |__|  |__|  |__|  |__|  |__|  |__|  |__|  ,  |__,__|  ,  |__|           
+;     <------------------- ADDR --------------------> <------------------------- DATA --------------> <---- IDLE ----->...
+; S=  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16  1  2  3  4  5  6
+; D=  [ 0     0     0     0     0     0     0     0 ] [ 0     0     0     0     0     1     0     1 ] 
+;
+; Both the IN base and the JMP pin mapping must be pointed at the GPIO used for RX.
+; Configure: No Autopush, ISR size 32, right-to-left [00CTRL6|ADDR8|DATA8].
+;
+PUBLIC data_ready:
+    push                        ; Push the received bits to the CPU
+wait_idle:
+    mov isr, NULL               ; Clear out the ISR (do this to handle starting over)
+    set y 5                     ; Get ready for initial 6 bits (the Control). y=5 due to read before check
+    set x 11                    ; Look for 5.5t (11*1/2t) of Idle (Space) state, then we'll start looking for Leader
+    wait 1 pin 0                ; Wait for the line to go idle
+next_idle_t:
+    jmp pin count_idle          ; 1/20t
+    jmp wait_idle               ; Got a Mark... Reset and wait for Idle
+count_idle:
+    jmp x-- next_idle_t [8]     ; [+9/20t]1/2t: Update Idle count and keep counting or test for start-over
+    ; We've counted 5t of Idle, so wait for the Leader
+wait_leader:
+    jmp x-- wait_mark           ; We'll count 5.5t of Leader Mark and then wait for the Space portion
+wait_mark:
+    wait 0 pin 0                ; Now wait for the Mark portion.
+next_ldr_mark_t:
+    jmp pin record_count [18]   ; 9/20t: If we get a Space, go back to waiting for Idle
+    jmp x-- next_ldr_mark_t     ; [+1/20t]1/2t: Update Leader count. Keep counting or wait for Space portion
+    jmp wait_idle               ; x is 0, use it to count the space len (won't jmp, just used to decrement)
+record_count:
+    mov isr, ~x                 ; record x
+    jmp data_ready              ; post it
+
+% c-sdk {
+static inline void rc6_philips_rx_program_init(PIO pio, uint sm, uint offset, uint gpio, float div) {
+    pio_sm_set_consecutive_pindirs(pio, sm, gpio, 1, false); // Start at 'gpio' for 1 pin as 'input' (false)
+    pio_gpio_init(pio, gpio);
+
+    pio_sm_config c = rc6_philips_rx_program_get_default_config(offset);
+    sm_config_set_in_pins(&c, gpio); // for WAIT and bit values
+    sm_config_set_jmp_pin(&c, gpio); // for JMP
+    sm_config_set_in_shift(&c, false, false, 32);    // Shift Left, No Autopush, 32bits [8x0+8ctrl+8addr+8data]
+    sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_RX);
+    sm_config_set_clkdiv(&c, div);
+    pio_sm_init(pio, sm, offset + rc6_philips_rx_offset_data_ready, &c);
+}
+%}

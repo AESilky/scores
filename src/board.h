@@ -35,6 +35,18 @@ extern "C" {
 extern int board_init(void);
 
 /**
+ * @brief Beep for a 'normal' duration
+ * @ingroup board
+ */
+extern void beep();
+
+/**
+ * @brief Beep for an 'extended' duration
+ * @ingroup board
+ */
+extern void beep_long();
+
+/**
  * @brief Flash the LED on/off
  * @ingroup board
  *

@@ -18,12 +18,15 @@
 #include "curswitch/curswitch.h"
 #include "net/net.h"
 #include "panel/panel.h"
+#include "rc/rc.h"
 #include "term/term.h"
 #include "util/util.h"
 
 #include "hardware/rtc.h"
 
 #include "panel/panel_msg_hndlr.h"
+
+#include <stdlib.h>
 
 #define _BE_STATUS_PULSE_PERIOD 6999
 
@@ -39,7 +42,7 @@ static bool _ui_initialized = false;
 // Message handler functions...
 static void _handle_be_test(cmt_msg_t* msg);
 static void _handle_config_changed(cmt_msg_t* msg);
-static void _handle_cmt_sleep(cmt_msg_t* msg);
+static void _handle_ir_frame(cmt_msg_t* msg);
 static void _handle_input_sw_debounce(cmt_msg_t* msg);
 static void _handle_panel_repeat_21ms(cmt_msg_t* msg);
 static void _handle_switch_action(cmt_msg_t* msg);
@@ -60,7 +63,6 @@ static uint32_t _last_rtc_update_ts; // ms timestamp of the last time we updated
 
 static const msg_handler_entry_t _be_test = { MSG_BE_TEST, _handle_be_test };
 static const msg_handler_entry_t _config_changed_handler_entry = { MSG_CONFIG_CHANGED, _handle_config_changed };
-static const msg_handler_entry_t _cmt_sm_tick_handler_entry = { MSG_CMT_SLEEP, _handle_cmt_sleep };
 static const msg_handler_entry_t _input_sw_debnce_handler_entry = { MSG_INPUT_SW_DEBOUNCE, _handle_input_sw_debounce };
 static const msg_handler_entry_t _panal_repeat_21ms_handler_entry = { MSG_PANEL_REPEAT_21MS, _handle_panel_repeat_21ms };
 static const msg_handler_entry_t _stdio_char_ready_handler_entry = { MSG_STDIO_CHAR_READY, stdio_chars_read };
@@ -72,8 +74,10 @@ static const msg_handler_entry_t _ui_initialized_handler_entry = { MSG_UI_INITIA
 // For performance - put these in order that we expect to receive more often
 static const msg_handler_entry_t* _be_handler_entries[] = {
     & _panal_repeat_21ms_handler_entry,
-    & _cmt_sm_tick_handler_entry,
+    & cmt_sm_tick_handler_entry,
     & _panel_slowblnk_handler_entry,
+    & _os_ir_frame_handler_entry,
+    & _os_rc_action_handler_entry,
     & _switch_action_handler_entry,
     & _switch_longpress_b1_handler_entry,
     & _switch_longpress_b2_handler_entry,
@@ -152,10 +156,6 @@ static void _handle_be_test(cmt_msg_t* msg) {
     msg_time.data.ts_us = now_us(); // Get the 'next' -> 'last_time' fresh
     schedule_msg_in_ms((period * 1000), &msg_time);
     times++;
-}
-
-static void _handle_cmt_sleep(cmt_msg_t* msg) {
-    cmt_handle_sleep(msg);
 }
 
 static void _handle_config_changed(cmt_msg_t* msg) {

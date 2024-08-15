@@ -41,6 +41,7 @@
 #include "debug_support.h"
 #include "cmt/multicore.h"
 #include "net/net.h"
+#include "rc/rc.h"
 #include "term/term.h"
 #include "panel/panel.h"
 #include "util/util.h"
@@ -268,6 +269,8 @@ int board_init() {
 
     // Initialize the Cursor Switches module based on the system config.
     curswitch_module_init(!system_cfg->ir1_is_rc, !system_cfg->ir2_is_rc);
+    // Initialize the Remote Control (IR) module based on the system config.
+    rc_module_init(system_cfg->ir1_is_rc, system_cfg->ir2_is_rc);
 
     // Initialize the multicore subsystem
     multicore_module_init();
@@ -277,14 +280,23 @@ int board_init() {
     return(retval);
 }
 
+extern void beep() {
+    tone_sound_duration(200);
+}
+
+extern void beep_long() {
+    tone_sound_duration(500);
+}
+
 void boot_to_bootsel() {
     reset_usb_boot(0, 0);
 }
 
-static void _tone_sound_duration_cont(void *user_data) {
+void _tone_sound_duration_cont(void *user_data) {
     tone_on(false);
 }
 void tone_sound_duration(int ms) {
+    debug_printf(true, "tone_sound_duration(%d)\n", ms);
     tone_on(true);
     if (!cmt_message_loop_0_running()) {
         sleep_ms(ms);
