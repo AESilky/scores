@@ -20,7 +20,9 @@
 			"assert.h": "c",
 			"features.h": "c",
 			"features-time64.h": "c",
-			"nec-rx.pio.h": "c"
+			"nec-rx.pio.h": "c",
+			"multicore.h": "c",
+			"display_oled1106.h": "c"
 		},
 		"cortex-debug.variableUseNaturalFormat": false
 	}

@@ -51,6 +51,11 @@ typedef enum _STRDATETIME_CTRL_ {
  */
 #define member_size(type, member) sizeof(((type *)0)->member)
 
+/***
+ * @brief Macro to get the number of elements in a static array
+ */
+#define ARRAY_ELEMENT_COUNT(arr) (sizeof(arr) / sizeof(*arr))
+
 /**
  * @brief Return precisely 0 or 1 from a zero / non-zero value.
  *

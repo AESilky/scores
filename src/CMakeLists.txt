@@ -41,6 +41,7 @@ add_subdirectory(gfx)
 add_subdirectory(net)
 add_subdirectory(panel)
 add_subdirectory(rc)
+add_subdirectory(setup)
 add_subdirectory(term)
 add_subdirectory(test)
 add_subdirectory(util)
@@ -111,6 +112,7 @@ target_link_libraries(scores
   scorekeeper
   scores_test
   segments7
+  setup
   term
   ui
   util

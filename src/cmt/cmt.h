@@ -105,15 +105,6 @@ typedef struct _CMT_MSG {
     uint32_t t;
 } cmt_msg_t;
 
-/**
- * @brief Handler Entry for the CMT Sleep. This is put in both message loop
- *      handler lists, so a sleep can be handled for either.
- * @ingroup cmt
- *
- */
-extern const msg_handler_entry_t cmt_sm_tick_handler_entry;
-
-
 #include "multicore.h"
 
 // Define functional names for the 'Core' message queue functions (Camel-case to help flag as aliases).
@@ -165,6 +156,15 @@ typedef struct _MSG_LOOP_CNTX {
     const msg_handler_entry_t** handler_entries;    // NULL terminated list of message handler entries
     const idle_fn* idle_functions;                  // Null terminated list of idle functions
 } msg_loop_cntx_t;
+
+/**
+ * @brief Handler Entry for the CMT Sleep. This is put in both message loop
+ *      handler lists, so a sleep can be handled for either.
+ * @ingroup cmt
+ *
+ */
+extern const msg_handler_entry_t cmt_sm_tick_handler_entry;
+
 
 /**
  * @brief Indicates if the Core-0 message loop has been started.

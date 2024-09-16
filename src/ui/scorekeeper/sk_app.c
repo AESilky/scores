@@ -12,7 +12,7 @@
 #include "board.h"
 #include "rc/rc.h"
 
-void sk_app_rc_action(rc_action_data_t action) {
+void sk_app_rc_action(rc_action_data_t action, bool longpress) {
     // If the RC is collecting a value, then wait for the value...
     if (!rc_is_collecting_value() && !action.repeat) {
         rc_vcode_t code = action.code;
@@ -28,6 +28,9 @@ void sk_app_rc_action(rc_action_data_t action) {
                 break;
             case RC_CH_DOWN:
                 scorekeeper_add_value(SKVALUE_B, -1);
+                break;
+            case RC_MENU:
+                // We don't use MENU, but we don't want it to beep
                 break;
             default:
                 beep();
@@ -66,6 +69,10 @@ void sk_app_rc_entry(rc_value_entry_t entry) {
             break;
     }
     rc_value_collecting_reset();
+}
+
+void sk_app_refresh() {
+    scorekeeper_mode_set(scorekeeper_mode_get());
 }
 
 void sk_app_switch_action(switch_bank_t bank, switch_id_t sw_id, bool pressed, bool long_press, bool repeat) {
