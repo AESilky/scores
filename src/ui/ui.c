@@ -22,6 +22,7 @@
 #include "rc/rc.h"
 #include "scorekeeper/sk_app.h"
 #include "scorekeeper/sk_tod.h"
+#include "setup/setup.h"
 #include "util/util.h"
 
 #include "hardware/rtc.h"
@@ -41,8 +42,8 @@ static ui_app_id_t _app_active;
 static bool _initialized = false;
 
 // Internal, non message handler, function declarations
-void setup_app_switch_action(switch_bank_t bank, switch_id_t sw_id, bool pressed, bool long_press, bool repeat);
 void _ui_init_terminal_shell();
+void _ui_setup_app_done();
 
 // Message handler functions...
 static void _handle_be_initialized(cmt_msg_t* msg);
@@ -181,17 +182,18 @@ static void _handle_input_switch_released(cmt_msg_t* msg) {
  *              about the action.
  */
 static void _handle_rc_action(cmt_msg_t* msg) {
-    rc_vcode_t code = msg->data.rc_action.code;
+    rc_action_data_t action = msg->data.rc_action;
+    rc_vcode_t code = action.code;
     bool repeat = msg->data.rc_action.repeat;
     // Don't do anything if it is a repeat. We use the LONGPRESS message for that.
     if (!repeat) {
         info_printf(false, "Remote: %d\n", code);
         switch (_app_active) {
             case APP_SCORES:
-                sk_app_rc_action(msg->data.rc_action);
+                sk_app_rc_action(action, false);
                 break;
             case APP_SETUP:
-                // TODO: Setup app RC action
+                setup_app_rc_action(action, false);
                 break;
             case APP_NONE:
                 // No application active. Nothing to do.
@@ -210,16 +212,24 @@ static void _handle_rc_action(cmt_msg_t* msg) {
  *              about the action.
  */
 static void _handle_rc_longpress(cmt_msg_t* msg) {
-    rc_vcode_t code = msg->data.rc_action.code;
+    rc_action_data_t action = msg->data.rc_action;
+    rc_vcode_t code = action.code;
     bool repeat = msg->data.rc_action.repeat;
     const char* repeatstr = (repeat ? " repeat" : "");
     info_printf(false, "Remote: %d Long Press%s\n", code, repeatstr);
     switch (_app_active) {
         case APP_SCORES:
-            sk_app_rc_action(msg->data.rc_action);
+            // If this is a LONG-PRESS+REPEAT of the MENU button, enter the Setup App.
+            if (repeat && code == RC_MENU) {
+                if (setup_app_run(_ui_setup_app_done)) {
+                    _app_active = APP_SETUP;
+                    return;
+                }
+            }
+            sk_app_rc_action(action, true);
             break;
         case APP_SETUP:
-            // TODO: Setup app RC action
+            setup_app_rc_action(action, true);
             break;
         case APP_NONE:
             // No application active. Nothing to do.
@@ -246,7 +256,7 @@ static void _handle_rc_value_entered(cmt_msg_t* msg) {
             sk_app_rc_entry(msg->data.rc_entry);
             break;
         case APP_SETUP:
-            // TODO: Setup app RC entry
+            setup_app_rc_entry(msg->data.rc_entry);
             break;
         case APP_NONE:
             // No application active. Nothing to do.
@@ -318,8 +328,13 @@ static void _handle_switch_longpress(cmt_msg_t* msg) {
 // Internal functions
 // ============================================
 
-void setup_app_switch_action(switch_bank_t bank, switch_id_t sw_id, bool pressed, bool long_press, bool repeat) {
-
+/**
+ * @brief Callback for the Setup app when done.
+ * @ingroup ui
+ */
+void _ui_setup_app_done(void) {
+    _app_active = APP_SCORES;
+    sk_app_refresh();
 }
 
 void _ui_init_terminal_shell() {
@@ -398,7 +413,9 @@ void ui_module_init() {
     _app_active = APP_NONE;
     ui_disp_build();
     _ui_init_terminal_shell();
-    // Initialize the score keeper
+    // Initialize the Setup functionality
+    setup_module_init();
+    // Initialize the Score Keeper app
     sk_app_module_init();
     // Start out in the Scorekeeper functionality (switches to Setup at times)
     _app_active = APP_SCORES;

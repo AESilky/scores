@@ -15,9 +15,11 @@ extern "C" {
 #include "curswitch/curswitch_t.h"
 #include "rc/rc_t.h"
 
-extern void sk_app_rc_action(rc_action_data_t action);
+extern void sk_app_rc_action(rc_action_data_t action, bool longpress);
 
 extern void sk_app_rc_entry(rc_value_entry_t entry);
+
+extern void sk_app_refresh();
 
 extern void sk_app_switch_action(switch_bank_t bank, switch_id_t sw_id, bool pressed, bool long_press, bool repeat);
 
