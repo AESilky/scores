@@ -30,6 +30,6 @@ etc.
 
 The linear display is also multiplexed LEDs, using the segment drives.
 
-The board also has a OLED display panel that also displays the score (intended
-for the back side to assist a scorekeeper).
+The board also has a OLED display panel (SPI) that can also display the score (intended
+for the back side to assist a scorekeeper), as well as for use for setup.
 
