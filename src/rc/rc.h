@@ -15,8 +15,6 @@
 extern "C" {
 #endif
 
-#include "rc.h"
-
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -109,5 +107,3 @@ extern void rc_module_init(bool ir_a_enabled, bool ir_b_enabled);
     }
 #endif
 #endif // _RCTRL_H_
-
-
