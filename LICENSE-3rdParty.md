@@ -55,8 +55,8 @@ The following is for easy reference:
 
 The SD SPI Library is used for the SD Card support. The SD Card is used to
 maintain configuration and other files. The code is within the `src/lib`
-directory. The source files contain the copyright and license information.
-and the full license file is included there.
+directory. The source files for the library within those directories contain
+the copyright and license information.
 
 The following is for easy reference:
 
